@@ -1,0 +1,183 @@
+\chapter{Introduction}
+
+\section{Purpose}
+
+Genetic algorithms (GAs) \cite{ga:holland92,ga:goldberg} cover a broad
+category of robust adaptive techniques. They have been used to solve an
+increasingly large variety of difficult problems, including parameter
+optimization, combinatorial optimization, rule learning, pattern recognition,
+automatic programming, adaptive control, \etc.
+
+The GA research community has produced a number of reusable GA implementations, \eg, 
+\cite{ga:genesis,ga:genesis-ug,ga:sga,ga:genitor:Whitley-Kauth-88,ga:gal} and many more,
+but many of them implement a specific approach to GAs which their authors
+prefer, or which reflects their research orientations. Though these
+implementations can be adapted to solving different problems, the amount
+of effort required to customize them generally increases dramatically as
+the proposed changes vary from the original visions of their
+implementors.
+
+Developing a GA-based application often requires a great deal of 
+experimenting --- trying variations on the genetic operators, the selection 
+algorithm, establishing various parameter settings, \etc.  Regardless of 
+what language is used for implementing the final system, it often makes a 
+great deal of sense to develop a prototype first, establishing the best 
+kind of GA for the application and gaining a good understanding of the 
+effects of varying each of the parameters, before proceeding to create 
+the production implementation.
+
+\Geco\index{GECO} (Genetic Evolution through Combination of Objects) is an
+attempt to construct a more flexible framework for prototyping GAs. It makes
+extensive use of object-oriented implementation techniques to
+provide this flexibility, and it was designed from the outset with the goal of
+being easily customized and extended.
+
+Although \geco\ is intended for developing more-or-less classical GAs, it 
+appears to be sufficiently flexible to be used for prototyping some related 
+classes of algorithms: Learning Classifier Systems (LCSs) 
+\cite{gbml:holland-reitman,gbml:holland-induction}, Genetic Programming 
+(GP) \cite{gp:koza}, Evolution Strategies (ESs) \cite{es:survey}, and 
+Evolutionary Programming (EP) \cite{ep:ds+go=ep}.
+
+\section{State of the System}
+
+\Geco\ was initially developed in the early 1990s, and used in some of the author's
+research around that time. But since then it has been mostly ignored
+until just recently. The author is now retired, and
+has decided to dust it off and update it for compatability with contemporary lisp
+development tools.
+It is still does not provide
+all the features required for it to be considered a complete GA toolkit. But
+where it lacks functionality, the author has attempted to make its structure sufficiently 
+robust and flexible that it can be easily extended to implement new
+capabilities. Much like other evolutionary
+processes, I hope to improve \geco\ as I learn through feedback from its
+community of users.
+
+\Geco\ is copyrighted free software. The complete source code is available
+directly from the author, and I will endeavor to make it available from online archives on
+the Internet.\index{\geco!availability}
+
+This version of the \geco\ documentation refers to version
+\gecoversion\index{\geco!version} of the software.
+
+\section{Why Lisp?}
+
+Since GAs are computationally expensive, most implementations are in
+`conventional' programming languages such as {\tt C} ``for efficiency.'' Lisp is
+a much more convenient language for prototyping, since almost all
+implementations are highly interactive and provide a great deal of support for
+the development process. Common Lisp has become the standard industrial
+strength dialect in the United States, and it has many high quality
+implementations on a wide variety of platforms. Furthermore, the compilers are
+capable of producing code which often rivals `conventional' language
+implementations for speed and efficiency. Common Lisp is also one of the most
+portable languages available today --- in many ways more portable than {\tt C}
+or Ada. The addition of the Common Lisp Object System
+(\concept{CLOS}) to the Common Lisp language \cite{cl:steele2,cl:keene} has
+provided a full-featured object-oriented extension to the language, which
+greatly enhances its capability for prototyping and writing extensible
+libraries.
+
+
+\section {Notational Conventions}
+
+This document follows several notational conventions for the sake of
+conciseness, and to assist the reader in understanding usage in context.
+
+\subsection {Terms and Concepts}
+
+Most new (and some common) terms and concepts which are used in this document
+are set in a {\sf sans serif} font when they are introduced and/or defined, or when
+it seems important to emphasize that the word or phrase has a specific meaning
+in context.
+
+\subsection {Source Code}
+
+All source code is set in a {\tt typewriter} style font, whether it
+appears in the body of the text, or set off from the body of the text as
+an example.  This includes names of Common Lisp or \geco-defined
+entities, such as names of functions, classes, \etc., which will also be
+set in {\tt typewriter} style font.
+
+\subsection {File Names, Network Paths, \ldots}
+
+All such references will be set in a {\tt typewriter} style font.
+
+\subsection {Descriptions of \Geco-defined Entities}
+
+The syntactic descriptions of functions, methods, variables, classes, and other
+definitions are presented in a distinctive format, similar to that used in Guy
+Steele's \ital{Common Lisp: The Language} \cite{cl:steele2}, and many other
+similar documents since. This stylized description is generally followed by
+narrative body text explaining the intended usage and semantics. References in
+the body text to components of the syntactic description will appear in the same
+type style in which the component appears in the syntactic description.
+
+The first line of one of these syntactic descriptions is always signalled by a
+$\Rightarrow$ symbol appearing in the left margin; this line is referred to
+below as a \concept{flag line}, since the symbol in the margin helps to
+{\em flag} the readers attention. This flag line specifies the name of the
+definition against the left margin, with the type of definition in italics and
+brackets against the right margin. For example:
+
+\egvar {example-variable}
+
+For functions, generic functions, and macros, any arguments appear on indented
+lines immediately following the flag line, with the argument names set in
+\slant{slanted} type. Common Lisp lambda-list keywords (\eg, 
+\verb_&optional_, \verb_&key_) are set in {\tt typewriter} style type,
+since they are literal language constructs in the definition (though they
+do not appear when the form is used). In addition, any \verb_&optional_,
+\verb_&key_, or \verb_&rest_ arguments which have default values are shown
+parenthesized, with the default value specification shown in {\tt
+typewriter} style type, since it is a Common Lisp literal.
+
+\eggeneric {example-function} {(arg1 arg2 \optional arg3)}
+
+For functions and methods, the second and subsequent lines specify the argument list, but also
+shows the specialization of arguments. \Ie, specialized arguments are shown in
+parentheses, with the specializing class following the argument, and in {\tt
+typewriter} style font, since it is a literal reference to a class.
+
+\egmethod {example-function} {((arg1 \cl{class1}) arg2
+                               \optional (arg3 \cl{'default-value}))}
+
+Variables, constants, and slots are specified in a similar manner. However since
+these entities may have default or initial values, such values are shown on
+indented lines immediately following the flag line. Similarly, class description
+flag lines may be followed by indented lines identifying any superclasses of the
+class.
+
+\egslotv {example-slot} {default-slot-value}
+
+Slot descriptions always follow the description of the class on which they are
+directly defined (descriptions of inherited slots are not repeated).
+Accessor functions and initargs for slots (if any) are specified on flag
+lines immediately following the descriptions of their slots.
+
+\egaccessor {example-slot-accessor}
+\eginitarg {:example-initarg}
+
+\subsection {The Index}
+
+All of \geco's definitions are doubly indexed, by both name and type of
+definition (\eg, function, class, slot, \etc.). In addition, all references to
+\geco-defined entities in the body of the text are indexed.  To aid the
+user in finding the definition in a potential forest of references, the
+page number of the definition(s) appears in \ital{italics}. 
+Note that in some cases, there may be more than one definition of a
+method, and the generic function definition is generally repeated in
+these cases as well.
+
+
+\section {Acknowledgments}
+
+I want to thank Randy Fennel and Al Underbrink for their help in beta-testing
+the software, and for their comments on early drafts of this documentation. Of
+course I am solely responsible for any errors which surely remain. I also want
+to thank John Koza for kindly permitting the reproduction of his implementation
+of the Park-Miller randomizer, Kate Juliff for inspiring the multi-chromosome
+features, and Larry Yaeger for publishing the \cl{C} implementation of gray code
+translation after which my implementation
+(section~\ref{section:gray-code-translation}) is patterned. 

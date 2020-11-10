@@ -1,0 +1,61 @@
+GECO Version History:
+1.0 16-Nov-92	GPW	Initial public release.
+2.0 29-Nov-93   GPW
+ - Changed the license to the GNU Library General Public License
+ - Minor patches for compatibility with other Lisps
+ - Added documentation
+ - Added some support for sequencing problems
+ - Added support for minimizing vs maximizing, including renaming the
+   organism "fitness" slot to "score"
+ - Added more selection methods, generalized existing ones to work with
+   both minimizing and maximizing GAs
+ - Removed phenotype support from the organism class and added a mixin
+   for when it is needed
+ - Removed the statistics slot from the genetic-plan class and deleted
+   the plan-statistics class, since it's not used by GECO.  If you need
+   it, define a subclass.
+ - Replaced printable-allele-set with printable-allele-values and
+   allele-values
+ - Renamed count-allele-values to count-allele-codes
+ - Renamed mutate-chromosomes to mutate-chromosome
+ - Renamed make-population-vector to make-organisms-vector
+ - Renamed some of the files (changed "_" to "-")
+ - Deleted unused function copy-population
+ - Created GECO-USER package and moved examples to it.
+ - Added conditional compilation features to select the random number
+   generator, and support lisps which don't implement tail-recursion
+   optimization
+ - Added max-organism and min-organism slots to the
+   population-statistics class
+ - Miscellaneous efficiency improvements
+ - Even fixed a bug or two B^)
+2.0.1 9-19-94   GPW
+ - Fixed a bug in the EIDETIC method for organisms which surfaces when
+   comparing organisms with no chromosomes.
+2.1 ??-???-??   GPW
+ - Converted documentation to PDF. It's also been updated and improved.
+   There are two versions: normal printable, and hyperlinked.
+ - Moved the change history (the data in this file) from the README file.
+ - Converted text files to unix line-endings (LFs, instead of CRs)
+ - Changed the calling sequence for the normalize-score generic function
+   and methods (removed the stats argument, since it's not needed)
+ - Fixed errors in bibliography of documentation
+ - Fixed error in pmx-cross-organisms to fix a bad arglist for
+   pmx-cross-chromosomes
+ - Fixed an error in the shared-initialize :after method for the
+   gray-code-translation class
+ - Rewrote pick-random-chromosome-index to more accurately do its job as
+   documented
+ - Renamed pick-locus-index to pick-random-locus-index, for consistency
+ - Modified the 
+ - Converted from MK-Defsystem to ASDF. This entailed moving a number of
+   files to subdirectories to correspond to the modules in geco.asd
+ - Updated copyright dates
+ - New versions of the demo files: sb-test.lisp, allele-counts.lisp, and
+   ss-test.lisp
+ - For the :geco-standard-cl-random feature, coerce the argument to
+   geco-random-float to a floating point number
+
+Contributors:
+GPW	George Williams
+

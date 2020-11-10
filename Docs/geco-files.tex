@@ -1,0 +1,223 @@
+\chapter{The GECO Files}\label{ch:geco-files}
+
+This section provides a brief overview of the \geco\ files.  The files are 
+discussed in groups, based on related type or content.
+
+The first group of files provide documentation.
+\begin{itemize}
+
+  \item \path|README|\\
+  An overview of the \geco\ distribution, including abstract, copyright and 
+  authorship information, installation instructions, version history.
+
+  \item \path|COPYING.LIB-2.0|\\
+  A copy of the GNU Library General Public License, version 2.0, which describes the 
+  terms under which \geco\ is distributed.
+  This document is a product of the Free Software Foundation, Inc., of 
+  Cambridge, Mass.
+
+  \item \path|geco.pdf|\\
+  A copy of the \geco\ documentation (this document), in Portable Document Format form.
+
+\end{itemize}
+
+The next file describes the structure and files provided with the \geco\ system for purposes
+of compiling and loading it into a lisp environment.
+
+\begin{itemize}
+
+\item \path|geco.asd|\\ 
+The system definition file. It contains the \cl{defsystem} form for creating \geco\ using {\sc asdf}.
+{\sc Asdf}, which stands for {\em Another System Definition Facility} is the most common
+mechanism for specifying system definitions for Common Lisp systems.
+Please see \href{https://common-lisp.net/project/asdf/}{https://common-lisp.net/project/asdf/}
+for information on how to install and use {\sc asdf}.
+
+It is also worth noting here that some of the \geco\ source code files are in
+subdirectories to facilitate the specification of {\em modules} in the {\sc asdf} \cl{defsystem}
+form in this file. These {\em modules} facilitate the expression of dependencies among the files.
+Where files are in subdirectories, relative path-names have been used below.
+
+
+\end{itemize}
+
+The next group of files contain definitions which must be loaded/compiled 
+before the rest of the \geco\ source code. Such dependencies and ordering is 
+handled automatically by {\sc asdf} using the \path|geco.asd| file.
+\begin{itemize}
+	
+	\item \path|packages.lisp|\label{file:packages.lisp}\\
+	This file defines the \geco\ packages, of which there are two:
+	\begin{enumerate}
+		\item \cl{GECO}\\
+		This package contains all of the code that implements \geco.
+		Most of the definitions of classes, functions, methods, etc., are exported from this package.
+		
+		\item \cl{GECO-USER}\\
+		This is the package that is typically used for user-defined code that uses \geco. It \cl{use}s
+		the \cl{GECO} package.
+	\end{enumerate}
+	
+	In addition, this file has a small amount of code that uses some conditional compilation features
+	to configure \geco\ to use one of two
+	random number generators, and to handle implementations that do not support tail-recursion optimization.
+	You should look at this code to determine if you need to change it for your system.	
+
+  \item \path|definitions/generics.lisp|\\
+  This file contains \cl{defgeneric} forms defining some (but not all)
+  of the generic function 
+  {\em protocol} established by \geco, \ie, the set of generic
+  functions and their arguments which must be honored by all \geco-based
+  applications. Each of the \cl{defgeneric} forms contains a
+  \cl{:documentation} string for the function describing its intended purpose
+  (these documentation strings are easily retrieved in most interactive lisp
+  programming environments). Comments in the file also indicate which of the
+  generic functions should/must have methods defined for your
+  application-specific classes when you implement a GA with \geco.
+
+  \item \path|definitions/classes.lisp|\\
+  This file contains the \cl{defclass} forms defining each of the \geco\ 
+  classes.
+
+\filbreak
+  \item \path|utilities/dbg.lisp|\\
+  This file contains the definitions for a simple debugging facility used 
+  in the development of \geco, and which may be useful for instrumenting user-developed
+  code as well. It should be obvious how it works, so you might want to take a look.
+
+\filbreak
+  \item \path|utilities/random.lisp|\\
+  This file contains the definition of the random number generators used by \geco,
+  \inxfun{geco-random-integer} and \inxfun{geco-random-float}.  In addition, it
+  includes the definition of an alternate set of random number generators, provided
+  with permission from John Koza from his implementation Simple Genetic
+  Programming in Lisp. Conditional compilation options (in \path|packages.lisp|, as mentioned above)
+  control which random number generator is used.
+
+\end{itemize}
+
+Most of the remaining files contain the method definitions for the guts of 
+\geco.  An attempt has been made to organize them by the principle class 
+to which the methods apply, however, due to the use of multiple-dispatch 
+methods, this has not always been possible.
+
+\filbreak
+In general, the files have been named using a standard pattern:
+{\it class-name}\path|-methods.lisp|. Presently, the single exception is 
+the file \path|selection-methods.lisp|, which I decided to separate from 
+the other \inxclass{population} methods.
+
+\filbreak
+
+\begin{itemize}
+
+  \item \path|methods/ecosystem-methods.lisp|\\
+  This file contains methods which perform the following general categories 
+  of operations:
+	\begin{itemize}
+	 \item initialize\index{initialization} ecosystems
+	 \item make instances of \inxclass{population} and \inxclass{genetic-plan} 
+		appropriate for an ecosystem
+	 \item evolve and evaluate ecosystems
+	\end{itemize}
+
+  \item \path|methods/genetic-plan-methods.lisp|\\
+  This file contains methods which perform the following general categories 
+  of operations:
+	\begin{itemize}
+	 \item regenerate instances of \inxclass{ecosystem} and \inxclass{population}
+	 \item determine when evolution should be terminated\index{termination}
+	\end{itemize}
+
+\filbreak
+  \item \path|methods/population-methods.lisp|\\
+  This file contains methods which perform the following general categories 
+  of operations:
+	\begin{itemize}
+	 \item initialize\index{initialization} and print instances of \inxclass{population}
+	 \item create \inxclass{organism} and \inxclass{population-statistics}
+               instances for a population 
+	 \item evaluate populations, and compute statistics over them
+	 \item compute normalized\index{normalization} scores over populations
+	 \item determine if a population has converged
+	\end{itemize}
+
+\filbreak
+  \item \path|methods/pop-stats-methods.lisp|\\
+  This file contains methods which perform the following general categories 
+  of operations:
+	\begin{itemize}
+	 \item initialize, and print instances of \cl{population-statistics}
+	 \item compute and normalize\index{normalization} population statistics
+	\end{itemize}
+
+\filbreak
+  \item \path|methods/selection-methods.lisp|\\
+  A fairly broad sampling of techniques for selecting \index{selection}
+  organisms from populations.  Techniques include:
+	\begin{itemize}
+	 \item random selection
+	 \item weighted roulette-wheel selection
+	 \item stochastic remainder selection
+	 \item tournament selection
+	\end{itemize}
+  A version of the roulette-wheel selection routine has also been generalized
+  to select an index from a table of weights. I expect this to be
+  useful for performing weighted \term{genetic operator} selection.
+
+\filbreak
+  \item \path|methods/organism-methods.lisp|\\
+  This file contains methods which perform the following general categories 
+  of operations:
+	\begin{itemize}
+	 \item initialize\index{initialization}, copy, and print instances of \inxclass{organism}
+	 \item create chromosomes for an organism
+	 \item evaluate and decode organisms
+	 \item compute normalized\index{normalization} scores of organisms
+	 \item determine if two organisms are the same
+	 \item choose random chromosomes, and random locations on chromosomes
+	 \item apply \term{genetic operator}s, such as \term{mutate} or \term{crossover} on organisms
+	\end{itemize}
+
+\filbreak
+  \item \path|methods/chromosome-methods.lisp|\\
+  This file contains methods which perform the following general categories 
+  of operations:
+	\begin{itemize}
+	 \item initialize\index{initialization}, copy, and print instances of \inxclass{chromosome}
+	 \item create and print \term{loci vectors}
+	 \item access individual loci
+	 \item pick random loci and allele values
+	 \item count allele values
+	 \item convert (internal) \term{allele codes} to (printable)
+               \term{allele values} 
+	 \item decode binary chromosomes
+	 \item gray-coded representations
+	 \item determine if two chromosomes are the same
+	 \item determine the Hamming distance between two chromosomes
+	 \item \term{genetic operator}s, such as \term{mutate} or \term{crossover} on organisms
+	\end{itemize}
+
+\end{itemize}
+
+Finally, there are also some files containing example GAs and related code.
+These files aren't intended to show impressive solutions to tough problems;
+rather they are intended to show how one might go about building a GA using \geco.
+
+\begin{itemize}
+	\item \path|sb-test.lisp|\\
+	This is the simple binary example discussed in
+	Chapter~\ref{chap:simple-binary-example}.
+
+	\item \path|allele-counts.lisp|\\
+	This file provides some utilities for counting alleles. It is fairly general, but has
+	not been tested enough yet to be included in \geco-proper.
+	
+	This file is required by \path|sb-test.lisp|
+
+  \item \path|ss-test.lisp|\\
+  This is the simple sequence example discussed in
+  Chapter~\ref{chap:simple-sequence-example}
+\end{itemize}
+
+

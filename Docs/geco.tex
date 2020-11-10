@@ -1,0 +1,89 @@
+% (in-package :GECO) so MCL knows to search the right package with m-.
+
+\documentclass[11pt,letterpaper]{report}
+
+\usepackage{sphack}		% six wierd spacing around commands (like \index) that should be invisible
+\usepackage{path}		% for control line-breaking in file paths, etc
+	% The following lists where discretionary breaks are allowed in \path
+	% default: \discretionaries |~!@$%^&*()_+`-=#{"}[]:;'<>,.?\/|
+	\discretionaries |_&+-=.\/|		%% must have a "\" before "/" in the pattern
+\usepackage{graphicx}	% add support for including graphics files
+\graphicspath{{figs/}}
+\usepackage[backend=bibtex,style=alphabetic,sorting=nyt]{biblatex}
+\addbibresource{geco}
+
+
+%\usepackage{hyperref}	% add hyperlinks in PdfLatex for things where it would be convenient
+	% if not using hyperref, uncomment the following line to define a substitute for \href:
+	\def\href#1#2{\path|#1|}
+	% if using hyperref, comment out the line above
+	%
+	% !!! whenever changing between using/not using hyperref, rebuild the index
+	% !!! assure that the \usepackage{path} line precedes all this
+
+
+\def\gecoversion{$2.1$}
+
+\title{GECO: A CLOS-based Framework for\\ Prototyping Genetic Algorithms
+	\vskip \medskipamount%
+	\normalsize --- Version \gecoversion{} ---}
+	\author{George P. W. Williams, Jr.\\
+	\normalsize\tt george.p.williams@pobox.com}
+
+\input{italic}		%%%% \import{/usr/local/texlive/2020/texmf-dist/doc/plain/newsletr/}{italic.tex} %% doesn't work
+
+\input{geco-defs}	%includes begin{doc}, maketitle
+
+\begin{document}
+	
+	\nocite{*}	% include only items that are cited
+	\maketitle
+
+	\begin{abstract}
+	
+\Geco\ (Genetic Evolution through Combination of Objects) is an extensible, object-oriented
+framework for prototyping genetic algorithms in Common Lisp. \Geco\ makes extensive use of
+CLOS, the Common Lisp Object System, to implement its functionality. The abstractions
+provided by the classes have been chosen with the intent both of being easily understandable
+to anyone familiar with the paradigm of genetic algorithms, and of providing the algorithm
+developer with the ability to customize all aspects of its operation. This paper provides a
+description of \geco\, including its internal structure, and presents some simple example
+genetic algorithms implemented on top of \geco. The author has made the implementation freely
+available via the Internet.
+
+	\end{abstract}
+	%\thispagestyle{empty}  %\thispagestyle must come after \end{abstract}
+	\vfill
+
+% \clearpage starts new page iff current is non-empty;
+% \newpage starts new page unconditionally
+
+\clearpage
+	% \setcounter{tocdepth}{2}  % we could control the depth of the TOC, if necessary
+	\tableofcontents
+
+\clearpage
+	\addcontentsline{toc}{chapter}{List of Figures}
+	\listoffigures
+
+\clearpage
+	%%\raggedright
+	\include{geco-intro}
+	\include{geco-concepts}
+	\include{geco-details}
+	\include{geco-sb-example}
+	\include{geco-ss-example}
+	\include{geco-files}
+
+\clearpage
+%	\addcontentsline{toc}{chapter}{Bibliography}  %% NOT biblatex
+%	\bibliographystyle{alpha}                     %% NOT biblatex
+\vfill
+	\printbibliography[heading=bibintoc,title=Bibliography]  %% biblatex
+
+\clearpage	% run MacMakeIndex geco.idx -> geco.ind
+	\addcontentsline{toc}{chapter}{Index}
+	\input{geco.ind}
+
+\end{document}
+

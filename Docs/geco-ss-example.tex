@@ -1,0 +1,374 @@
+\chapter{A Simple Sequence Example} \label{chap:simple-sequence-example}
+
+An example of how to customize \geco\ is provided in the file \path|ss-test.lisp|,
+which presents an example GA to solve a simple problem for optimizing a sequence of things.
+Sequence optimization is often used to solve problems such as the Traveling Salesman
+Problem.\footnote{See \href{https://en.wikipedia.org/wiki/Travelling\_salesman\_problem}{https://en.wikipedia.org/wiki/Travelling\_salesman\_problem}}
+The following material provides an overview of the definitions in this file,
+providing some discussion of each, why it is necessary and/or
+what it does, and how it fits into the \geco\ framework.
+
+\filbreak
+
+\section{Using \Geco\ with Packages}
+
+See section \ref{sec:using-geco-packages}.
+
+\filbreak
+
+\section{Defining the Genetic Structures}
+
+{\samepage
+The file starts with the definition of some special (dynamically bound) variables,
+most of which are used to simplify testing.
+\begin{clcode}(defvar *SSE* nil {\sl "a simple sequence ecosystem"})
+(defvar *SSE-STATISTICS-FILE-COUNTER* 0)
+(defvar *SSE-STATISTICS-FILE-NAME* "sse-stats")
+(defvar *SSE-STATISTICS-STREAM*) ; {\sl should probably be a slot on ecosystem}
+(defvar *SSE-DEFAULT-POP-SIZE* 40)
+(defvar *SSE-DEFAULT-EVAL-LIMIT* 3000)
+(defvar *SSE-PROB-MUTATE* 0.025)
+(defvar *SSE-PROB-CROSS* 0.8)\end{clcode}
+}%end \samepage
+
+\filbreak
+
+{\samepage
+
+Next, there is a \cl{let*}-form which allows generalizing the definition of the
+\term{chromosome} class and some of its methods to simplify changing the sequence length.
+This form could be used to generalize many of the other definitions in the file, but that
+is left as an exercise... The effect of this \cl{let*} form is to create the following
+definitions:
+\begin{clcode}(defclass SSE-CHROMOSOME-10 (sequence-chromosome)
+  ())
+
+(defmethod SIZE ((self sse-chromosome-10))
+  10))
+
+(defmethod LOCUS-ARITY ((self sse-chromosome-10) locus-index)
+  (declare (ignore locus-index))
+  10)
+
+(defmethod PRINTABLE-ALLELE-VALUES ((self sse-chromosome-10) locus-index)
+  (declare (ignore locus-index))
+  #(#\\0 #\\1 #\\2 #\\3 #\\4 #\\5 #\\6 #\\7 #\\8 #\\9))\end{clcode}
+}%end \samepage
+
+\filbreak
+
+Our new class is a specialized version of \inxclass{sequence-chromosome}
+(see Section \ref{sec:sequence-chromosomes}), and the above method definitions proviide
+\geco\ with information it needs to implement some of its functionality, just as
+we did in the previous chapter's example.
+
+Next is the definition of a specialized form of crossover that works on \inxclass{sse-chromosome-10}
+instances.
+This method is actually a slightly modified version of the \inxmethod{r3-cross-organisms} that is
+built into \geco\ for all instances of the \inxclass{sequence-chromosome} class (and its subclasses),
+but the method here illustrates how the standard \geco-supplied method can be copied and
+modified. This method adds a heuristic aspect to the original method (which is not necessarily better).
+
+
+{\samepage
+Next, we define \inxclass{sse-10-organism} as a subclass of \inxclass{organism}.
+This class will hold a single chromosome of the class we just defined in its
+\inxslot{genotype} slot. And using the same technique as in the previous paragraph, we define
+a method \inxmethod{chromosome-classes} for this class to give \geco\ a list of classes
+for the chromosomes which will be held by instances of this subclass of organism.
+Specifically, this method returns a list of length one (since we only need one
+chromosome), and the sole list element is the name of our application specific
+chromosome class, \inxclass{sse-chromosome-10}.
+\begin{clcode}(defclass SSE-ORGANISM-10 (organism)
+  ())
+
+(defmethod CHROMOSOME-CLASSES ((self sse-organism-10))
+  '(sse-chromosome-10))\end{clcode}
+}%end \samepage
+
+\filbreak
+
+{\samepage
+The next class definition is a specialization of the \geco\ class
+\inxclass{population-statistics}. Instances of this class are used by \geco\ to record
+statistical information about the current population to simplify certain operations
+like normalizing\index{normalization} scores and determining whether the population
+has \term{converged}. By specializing this class, we'll be able to
+piggy-back some of the calculations we want performed on the functions which \geco\
+will already be invoking. To record the additional information we want, we add a couple
+of slots to the class.
+\begin{clcode}(defclass SSE-POPULATION-STATISTICS-10 (population-statistics)
+  (;; {\sf the following slots are set by class specific compute-statistics{\tt :after} method }
+   (SUM-SQUARES
+    :accessor sum-squares
+    :initarg :sum-squares
+    :type number)
+   (STD-DEVIATION
+    :accessor std-deviation
+    :initarg :std-deviation
+    :type number)))\end{clcode}
+}%end \samepage
+
+\filbreak
+
+{\samepage
+To fill in these additional slots, we define a shorthand function \cl{SQR}, and an \cl{:after}
+method on \geco's builtin \inxmethod{compute-statistics} method:
+\begin{code}(defun SQR (n)
+  (* n n))
+
+(defmethod COMPUTE-STATISTICS :AFTER ((self sse-population-statistics-10))
+  (with-accessors ((size size)
+                   (orgs organisms))
+                  (population self)
+    (with-accessors ((sum sum-score)
+                     (sum-sq sum-squares)
+                     (stdev std-deviation))
+                    self
+      (setq sum-sq 0.0)
+      (dotimes (i size)
+        (incf sum-sq (sqr (score (aref orgs i)))))
+      (setq stdev (sqrt (/ (- sum-sq (float (/ (sqr sum) size)))
+                           (1- size)))))))\end{code}
+}%end \samepage
+
+\filbreak
+
+{\samepage
+
+We then also provide a method to pretty-print objects of this new class:
+\begin{code}(defmethod PRINT-OBJECT ((self sse-population-statistics-10) stream &AUX
+                         (sse (ecosystem (population self))))
+  (print-unreadable-object (self stream :type t :identity t)
+    (if (slot-boundp self 'max-score)
+        (format stream "Max=~F, Avg=~,2F, StdDev=~,2F, #Gens=~D, #Evals=~D"
+                (max-score self)
+                (avg-score self)
+                (std-deviation self)
+                (generation-number sse)
+                (evaluation-number sse))
+      (princ "#unbound#" stream))))\end{code}
+
+}%end \samepage
+
+\filbreak
+
+The next class definition is a specialization of the class
+\inxclass{generational-population}, which is itself a specialization of the class
+\inxclass{population}. We also add the \inxclass{maximizing-score-mixin} so that
+\inxmethod{converged-p} will have the information it needs to determine whether the
+population has \term{converged}.
+
+\filbreak
+
+{\samepage
+
+The principle noteworthy feature of this subclass,
+\inxclass{sse-population-10}, is that it provides some additional methods to
+provide information to \geco\ so that it can perform its duties
+automatically. Specifically, the \inxmethod{organism-class} method tells \geco\ what
+class the organism instances are to be, and the
+\inxmethod{population-statistics-class} method tells \geco\ what class the population
+statistics instances are to be, while the other methods provide
+\begin{clcode}(defclass SSE-POPULATION-10 (generational-population maximizing-score-mixin)
+  ())
+
+(defmethod ORGANISM-CLASS ((self sse-population-10))
+  'sse-organism-10)
+
+(defmethod POPULATION-STATISTICS-CLASS ((self sse-population-10))
+  'sse-population-statistics-10)\end{clcode}
+
+}%end \samepage
+
+\filbreak
+
+{\samepage
+
+At this point please notice that telling \geco\ to create an instance of the class
+\inxclass{sse-population-10} is sufficient, and that \geco\ can then create a
+complete population of organisms of the proper class, and that each organism will
+contain chromosomes of the proper class, and each chromosome will have a \term{loci
+vector} of the proper size and type, initialized\index{initialization} to random
+alleles that are unique to the chromosome; \ie, a sequence, albiet not necessarily in order.
+Thus, the structures (at this level) which will be manipulated by our GA are
+completely specified. Next, we need to specify the plan which controls
+the GA.
+
+}%end \samepage
+
+\filbreak
+
+
+\section{Defining a Genetic Plan}
+
+{\samepage
+	
+Next we introduce a class definition that is a specialization of the class \inxclass{genetic-plan}.
+As mentioned earlier, the \term{genetic plan} provides a strategy which determines how an ecosystem
+regenerates, \ie, how new organisms are created from older organisms. This is the
+heart of the genetic algorithm. Subclasses of the class \inxclass{genetic-plan} are
+primarily used to specialize methods which perform the actual processing of the GA. To start with,
+that includes some methods to supply probabilities for applying the \term{genetic operator}s.
+\begin{clcode}(defclass SSE-PLAN (genetic-plan)
+  ())
+
+(defmethod PROB-MUTATE ((self sse-plan))
+  *sse-prob-mutate*)
+
+(defmethod PROB-CROSS ((self sse-plan))
+  *sse-prob-cross*)\end{clcode}
+
+}%end \samepage
+
+\filbreak
+
+
+Next is an \inxmethod{evaluate} method specialized on both the \inxclass{sse-plan}
+and \inxclass{sse-organism-10} classes. This is the method which calculates the
+raw (unnormalized) score of each organism which our plan evolves. In our specific
+problem, score is the sum of the absolute values of the difference between a loci's
+value and the value it should be.
+
+\filbreak
+
+{\samepage
+
+Note that in most applications, this kind of knowledge
+is unlikely to be available. If it were, why would we need a GA? In general,
+\inxmethod{evaluate} algorithms will need to incorporate heuristics, and the
+heuristics chosen by the developer will have a critical impact on guiding the
+search.
+\begin{clcode}(defmethod EVALUATE ((self sse-organism-10) (plan sse-plan) &AUX
+                     (chromosome (first (genotype self)))
+                     (chromosome-size (size chromosome)))
+  (declare (ignore plan))
+  (setf (score self)
+  (do* ((locus# 0 (1+ locus#))
+        (result 0))
+       ((>= locus# chromosome-size)
+        result)
+    (incf result (- 10 (abs (- locus# (locus chromosome locus#))))))))\end{clcode}
+
+}%end \samepage
+
+\filbreak
+
+{\samepage
+As in the previous chapter, a few additional points worth noting about \inxgeneric{evaluate}:
+\begin{itemize}
+  \item This is the only place in our example GA which needs 
+	to interpret the genetic content of our application-specific organism.
+  \item Often it is necessary to \term{decode} the genetic content of an 
+	organism, converting the \term{genotype} into an instance of the
+	\term{phenotype} represented by the genotype.  \Geco\ provides for this by 
+	including the following:
+    \begin{itemize}
+	\item A \inxslot{genotype} slot is defined in the \inxclass{organism} class.
+	\item A \inxslot{phenotype} slot is defined in the
+		\inxclass{organism-phenotype-mixin} class.
+	\item A \inxgeneric{decode} generic function is called in a \cl{:before} method 
+		of \inxgeneric{evaluate} specialized on the
+       	\inxclass{organism-phenotype-mixin} and  
+		\inxclass{genetic-plan} classes.
+	\item Since \geco\ cannot predefine a method for \inxgeneric{decode}, any GAs
+		using phenotypes must be sure to implement one for the application
+		specific subclass of \inxclass{organism} and
+		\inxclass{organism-phenotype-mixin}.
+    \end{itemize}
+  \item Generally there is little reason for the plan to be an argument to
+	this particular method, but it is part of the protocol for the
+	\inxgeneric{evaluate} generic function, which is also used at the 
+	\inxclass{ecosystem} and \inxclass{population} levels of our class hierarchy, and
+        at these higher levels it may well be appropriate for the
+        \term{genetic plan} to discriminate between alternate methods.  
+\end{itemize}
+}%end samepage
+
+\filbreak
+
+{\samepage
+
+The next method defined in our example is \inxmethod{regenerate}, which is specialized
+on both the \inxclass{sse-plan} and the \inxclass{sse-population-10}
+classes. The purpose of this method is to create a new (or revised) population based
+on the current one, using whatever strategy is specific to the \term{genetic plan}.
+There is a default method provided by \geco\ in
+\path|genetic-plan-methods.lisp| for subclasses of \inxclass{generational-population},
+but it is provided as a template, not a realistic example, since it simply copies
+random organisms from one generation to the next (plus some simple bookkeeping). Our
+specialized version of \inxmethod{regenerate} replaces the random copying with a call
+to a new generic function \inxgeneric{operate-on-population} which takes the current
+and new (but empty) populations as input, and updates the new population.
+\begin{clcode}
+(defmethod REGENERATE ((plan sse-plan)
+                       (old-pop sse-population-10) &AUX
+                       (new-pop (make-population (ecosystem old-pop)
+                                                 (class-of old-pop)
+                                                 :size (size old-pop))))
+  ;; {\sf selectively reproduce, crossover, and mutate}
+  (operate-on-population plan old-pop new-pop)
+  ;; {\sf record old-pop's statistics}
+  (print (statistics old-pop) *sse-statistics-stream*)
+  new-pop)\end{clcode}
+}%end \samepage
+
+\filbreak
+
+The method \inxmethod{operate-on-population} for \inxclass{sse-plan} uses a
+selection technique referred to as ranking selection (see Section~\ref{sec:selection-methods},
+page~\pageref{method:ranking-preselect}) to select one organism at a
+time from the old (current) population, then based on a random draw applies either a
+random respectful recombination \term{crossover} (see Section~\ref{method:r3-cross-organisms},
+page~\pageref{method:r3-cross-organisms}) with another
+member of the old population (selected randomly), a \inxmethod{swap-alleles} \term{mutate}
+operator (see Section~\ref{method:swap-alleles}, page~\pageref{method:swap-alleles}),
+or simple reproduction, to supply members of the new population.
+
+\filbreak
+\begin{clcode}(defvar *SSE-POP-SUBSET-SIZE* 0.6
+  {\sf "Subset of the old population from which ranking selection will be drawn."})
+
+(defmethod OPERATE-ON-POPULATION ((plan sse-plan) old-pop new-pop &AUX
+                                  (new-orgs (organisms new-pop))
+                                  (p-cross (prob-cross plan))
+                                  (p-mutate (+ p-cross (prob-mutate plan)))
+                                  (pop-size (size new-pop))
+                                  (orphan (make-instance
+                                           (organism-class old-pop))))
+  (do* ((generator (ranking-preselect old-pop
+                                      :multiplier *sse-pop-subset-size*)
+                   (ranking-preselect old-pop
+                                      :multiplier *sse-pop-subset-size*))
+        (org1 (funcall generator)
+              (funcall generator))
+        org2
+        (random# (geco-random-float 1.0) (geco-random-float 1.0))
+        (i 0 (1+ i)))
+       ((>= i pop-size))
+    (cond
+     ((> p-cross random#)
+      (if (< (hamming-distance
+              (first (genotype org1))
+              (first (genotype (setf org2 (funcall generator))))))
+          (r3-cross-organisms
+           org1 org2
+           (setf (aref new-orgs i) (make-organism new-pop))
+           orphan ;a throw-away
+           :allele-test #'=)
+        ;; {\sf hamming distances less than 2 will produce eidetic offspring anyway,}
+        ;; {\sf so bypass crossover}
+        (setf (aref new-orgs i)
+              (copy-organism-with-score org1 :new-population new-pop))))
+     ((> p-mutate random#)
+      (swap-alleles (setf (aref new-orgs i)
+                          (copy-organism org1 :new-population new-pop))))
+     (T ;; {\sf copying the score bypasses the need for a redundant evaluation}
+      (setf (aref new-orgs i)
+            (copy-organism-with-score org1 :new-population new-pop))))))\end{clcode}
+\filbreak
+
+The remaining code in \verb|ss-test.lisp| simply provides a test harness 
+to repeatedly invoke the GAs, and accumulate performance information over 
+a specified number of runs.
+

@@ -1,0 +1,329 @@
+% Page style parameters
+\addtolength{\oddsidemargin}{-.5in}
+\addtolength{\evensidemargin}{-.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+\setlength{\headheight}{20pt}
+\setlength{\headsep}{20pt}
+\raggedbottom
+\clubpenalty=8000 \widowpenalty=8000 % I hate orphans & widows
+
+\makeatletter  %force abstract to appear on the same page as the title
+	\def\titlepage{\@restonecolfalse\thispagestyle{empty}\c@page\z@}
+	\def\endtitlepage{}
+\makeatother
+
+% Section numbering & TOC style parameters
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{3}
+
+% Paragraph style parameters
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.5ex}
+\newskip  \normalparskip        
+\normalparskip = 1.5ex
+
+%\tracingall
+
+%%
+%% Basic macros
+%%
+
+	\makeatletter	% allow @-sign to be considered as a letter; for special definitions
+
+%%% The following \cl macros are based on a version lifted from the CLIM 2 spec.
+%% This allows hyphenation of CL symbols at the hyphens that exist in
+%% the symbol name, but noplace else, e.g., \cl{standard-region-union}.
+%% Hyphens are active characters, so we don't break Tags Search.
+%% This version of \cl has additional smarts to allow TeX's special characters
+%% (except braces and "\"), based on LaTeX's verbatim.
+%% When you supply a default value for optional or keyword arguments,
+%% use this idiom:  \key (filled \cl{t})
+
+% The \doclspecials is a modified version of \dospecials from plain.tex
+\def\doclspecials{\do\$\do\&\do\#\do\^\do\_\do\%\do\~}
+% (not counting ascii null, tab, linefeed, formfeed, return, delete).
+% For \cl we also removed the space, \, {, }, ^^A, and ^^K.
+% Each symbol in the list is preceded by \do, which can be defined
+% if you want to do something to every item in the list.
+
+% The clhyphen definitions are necessary to support the automatic cl indexing macros.
+% \index does strange things to its args, and the hyphen mustn't get expanded.
+\def\cl@normalhyphen{-}
+\def\cl@breakinghyphen{{\tt \char`\-}\penalty\exhyphenpenalty}
+\def\cl@hyphen{\cl@normalhyphen}
+\def\setclnormalhyphen{\let\cl@hyphen=\cl@normalhyphen}
+\def\setclbreakinghyphen{\let\cl@hyphen=\cl@breakinghyphen}
+
+{\catcode`\-=\active%
+\gdef\setclspecials{\catcode``=\active\@noligs\frenchspacing\@vobeyspaces%
+\setclbreakinghyphen\catcode`\-=\active\def-{\cl@hyphen}\def\\{\char`\\}%
+\let\do=\@makeother\doclspecials}
+\gdef\arg{\begingroup\setclspecials%
+\def-{{\sl\char`\-}\penalty\exhyphenpenalty}%
+\@xarg}}
+\def\@xarg#1{{\sl#1}\endgroup}
+\def\cl{\begingroup\setclspecials\@xcl}
+\def\@xcl#1{{\tt#1}\endgroup}
+
+%%% \begin{\clcode} ... \end{clcode} environment, based on LaTeX's verbatim.
+\usepackage{code-os}
+\def\clcode{\codeaux{}}
+\let\endclcode=\endcodeaux
+
+\def\ttdash{\mbox{{\tt -}}}	%for use in math mode
+
+%\begingroup
+%  \catcode`|=0 \catcode`[= 1 \catcode`]=2 \catcode`\{=12 \catcode`\}=12 \catcode`\\=12
+%  |gdef|@xclcode#1\end{clcode}[#1|end[clcode]]
+%|endgroup
+%\def\clcode{\trivlist \item[]\if@minipage\else\vskip\parskip\fi
+%  \leftskip\@totalleftmargin\rightskip\z@
+%  \parindent\z@\parfillskip\@flushglue\parskip\z@
+%  \@tempswafalse \def\par{\if@tempswa\hbox{}\fi\@tempswatrue\@@par}
+%  \obeylines \tt \catcode``=\active \@noligs \frenchspacing\@vobeyspaces
+%  \let\do=\@makeother \doclspecials \@xclcode}
+%\let\endclcode=\endtrivlist
+
+%%
+%% Special indexing macros
+%%
+
+%\def\dowithonearg#1{\def\argone{#1}\do}
+%\def\dowithtwoargs#1#2{\def\argone{#1}\def\argtwo{#2}\do}
+
+%% inline references that are indexed
+
+% singly indexed
+% common lisp
+\def\clinx{\begingroup\setclspecials\@xclinx}
+	\def\@xclinx#1{\@xcl{#1}\@bsphack\setclnormalhyphen\index{{\tt#1}}\@esphack}
+
+% ...d variants are doubly indexed
+\def\cldinx{\begingroup\setclspecials\@xcldinx}
+	\def\@xcldinx#1#2{\@xcl{#1}\ttdblinx{#1}{#2}}
+
+	\def\ttdblinx#1#2{\@bsphack\begingroup\setclspecials\setclnormalhyphen%
+	\index{{\tt#1}!#2}\index{#2!{\tt#1}}\endgroup\@esphack}
+
+% macros, functions, ...
+\def\inxmac{\begingroup\setclspecials\@xinxmac}
+	\def\@xinxmac#1{\@xcldinx{#1}{Macro}}
+
+\def\inxfun{\begingroup\setclspecials\@xinxfun}
+	\def\@xinxfun#1{\@xcldinx{#1}{Function}}
+
+\def\inxgeneric{\begingroup\setclspecials\@xinxgeneric}
+	\def\@xinxgeneric#1{\@xcldinx{#1}{Generic Function}}
+
+\def\inxmethod{\begingroup\setclspecials\@xinxmethod}
+	\def\@xinxmethod#1{\@xcldinx{#1}{Primary Method}}
+
+\def\inxbeforemethod{\begingroup\setclspecials\@xinxbeforemethod}
+	\def\@xinxbeforemethod#1{\@xcldinx{#1}{:Before Method}}
+
+\def\inxaftermethod{\begingroup\setclspecials\@xinxaftermethod}
+	\def\@xinxaftermethod#1{\@xcldinx{#1}{:After Method}}
+
+\def\inxaroundmethod{\begingroup\setclspecials\@xinxaroundmethod}
+	\def\@xinxaroundmethod#1{\@xcldinx{#1}{:Around Method}}
+
+\def\inxvar{\begingroup\setclspecials\@xinxvar}
+	\def\@xinxvar#1{\@xcldinx{#1}{Variable}}
+
+\def\inxconst{\begingroup\setclspecials\@xinxconst}
+	\def\@xinxconst#1{\@xcldinx{#1}{Constant}}
+
+\def\inxclass{\begingroup\setclspecials\@xinxclass}
+	\def\@xinxclass#1{\@xcldinx{#1}{Class}}
+
+\def\inxslot{\begingroup\setclspecials\@xinxslot}
+	\def\@xinxslot#1{\@xcldinx{#1}{Slot}}
+
+\def\inxinitarg{\begingroup\setclspecials\@xinxinitarg}
+	\def\@xinxinitarg#1{\@xcldinx{#1}{Initarg}}
+
+\def\inxtype{\begingroup\setclspecials\@xinxtype}
+	\def\@xinxtype#1{\@xcldinx{#1}{Type}}
+
+%%
+%% Miscellaneous
+%%
+
+
+\long\def\issue#1#2{{\sl Issue: #2 ---~#1}}
+\def\bold#1{{\bf #1}}  % italic.sty also defines \ital{} and \slant{}
+
+
+% \comment<some-char>...text...<same-char> comments out TeX source
+% analogous to \verb<some-char>...text...<same-char>
+% sp. case: \comment{...text...} == \comment}...text...}
+\def\comment{%   Stolen from slatex.sty
+\begingroup \let\do\@makeother \dospecials \@comm}
+\def\word@nd{\hskip-.35em\penalty\@M\null}
+\begingroup\catcode`\<1\catcode`\>2
+\catcode`\{12\catcode`\}12
+\long\gdef\@comm#1<%
+\if#1{\long\def\@tempa ##1}<\endgroup\word@nd>\else
+	\long\def\@tempa ##1#1<\endgroup\word@nd>\fi
+\@tempa>
+\endgroup
+
+%% Use \concept when you are introducing a term for the first time, and
+%% want it in the index.  Use \term after that.
+\def\concept#1{{\sf#1}\@bsphack\index{#1|ital}\@esphack}
+\def\term#1{{\sf#1}}
+
+	\makeatother	% reverses the effect of \makeatletter
+
+%%
+%% Definition types
+%%
+
+\def\removedepth{\ifdim \prevdepth>-1000pt \vskip -\prevdepth\fi}
+\def\Vskip #1!{\endgraf\removedepth     
+               \ifdim \lastskip<#1 \ifdim \lastskip>0pc
+               \removelastskip\fi 
+               \vskip#1\fi}
+
+\def\outdent#1{\noindent\hbox to 0pc{\hskip -1.5pc #1\hss}\ignorespaces}
+\def\brac#1{\rm[{\it #1\/}]}
+
+%% Use these when you want to leave vertical whitespace above
+\def\Dodoc#1#2{\Vskip \bigskipamount!%
+	\outdent{$\Rightarrow$}\index{{\tt #1}!#2|ital}\index{#2!{\tt #1}|ital}%
+	{\tt #1\hfill\hbox{\brac{\it #2\/}}%
+		\Vskip .1pt!}}
+\def\Dodocf#1#2#3{\Vskip \bigskipamount!%
+	\outdent{$\Rightarrow$}\index{{\tt #1}!#3|ital}\index{#3!{\tt #1}|ital}%
+	{\hangindent=1cm\hangafter=1%
+		\tt #1\hfill\hbox{\brac{\it #3\/}}\linebreak%
+		{\raggedright{\sl #2}\hfill\Vskip .1pt!}}}
+%\def\Dodocv#1#2#3{\vbox spread -10pt {\Vskip \bigskipamount!%
+\def\Dodocv#1#2#3{\vbox spread -2pt {\Vskip \bigskipamount!%
+	\outdent{$\Rightarrow$}\index{{\tt #1}!#3|ital}\index{#3!{\tt #1}|ital}%
+	{\hangindent=1cm\hangafter=1%
+		\tt #1\hfill\hbox{\brac{\it #3\/}}\linebreak%
+		{\raggedright{\tt #2}\hfill\Vskip .1pt!}}\vss}}
+
+%% Use these when you want to leave some vertical whitespace above
+\def\Defmacro #1 #2 {\Dodocf {#1} {#2} {Macro}}
+\def\Defun #1 #2 {\Dodocf {#1} {#2} {Function}}
+\def\Defgeneric #1 #2 {\Dodocf {#1} {#2} {Generic Function}}
+\def\Defmethod #1 #2 {\Dodocf {#1} {#2} {Primary Method}}
+\def\Defbeforemethod #1 #2 {\Dodocf {#1} {#2} {:Before Method}}
+\def\Defaftermethod #1 #2 {\Dodocf {#1} {#2} {:After Method}}
+\def\Defaroundmethod #1 #2 {\Dodocf {#1} {#2} {:Around Method}}
+\def\Defvar #1 {\Dodoc {#1} {Variable}}
+\def\Defvarv #1 #2 {\Dodocv {#1} {#2} {Variable}}
+\def\Defconst #1 {\Dodoc {#1} {Constant}}
+\def\Defconstv #1 #2 {\Dodocv {#1} {#2} {Constant}}
+\def\Defclass #1 {\Dodoc {#1} {Class}}
+\def\Defclassv #1 #2 {\Dodocf {#1} {#2} {Class}}
+\def\Defslot #1 {\Dodoc {#1} {Slot}}
+\def\Defslotv #1 #2 {\Dodocv {#1} {#2} {Slot}}
+\def\Definitarg #1 {\Dodoc {#1} {Initarg}}
+\def\Deftype #1 {\Dodoc {#1} {Type}}
+\def\Defoption #1 {\Dodoc {#1} {Option}}
+\def\Defcondition #1 {\Dodoc {#1} {Condition}}
+\def\Defrestart #1 {\Dodoc {#1} {Restart}}
+
+%% Use these when you don't want to leave any vertical whitespace above
+\def\dodoc#1#2{\Vskip .1pt!%
+	\outdent{$\Rightarrow$}\index{{\tt #1}!#2|ital}\index{#2!{\tt #1}|ital}%
+	{\tt #1\hfill\hbox{\brac{\it #2\/}}%
+		\Vskip .1pt!}}
+\def\dodocf#1#2#3{\Vskip .1pt!%
+	\outdent{$\Rightarrow$}\index{{\tt #1}!#3|ital}\index{#3!{\tt #1}|ital}%
+	{\hangindent=1cm\hangafter=1%
+		\tt #1\hfill\hbox{\brac{\it #3\/}}\linebreak%
+		{\raggedright{\sl #2}\hfill\Vskip .1pt!}}}
+%\def\dodocv#1#2#3{\vbox spread -10pt {\Vskip .1pt!%
+\def\dodocv#1#2#3{\vbox spread -2pt {\Vskip .1pt!%
+	\outdent{$\Rightarrow$}\index{{\tt #1}!#3|ital}\index{#3!{\tt #1}|ital}%
+	{\hangindent=1cm\hangafter=1%
+		\tt #1\hfill\hbox{\brac{\it #3\/}}\linebreak%
+		{\raggedright{\tt #2}\hfill\Vskip .1pt!}}\vss}}
+
+%% Use these when you don't want to leave any vertical whitespace above
+\def\defmacro #1 #2 {\dodocf {#1} {#2} {Macro}}
+\def\defun #1 #2 {\dodocf {#1} {#2} {Function}}
+\def\defgeneric #1 #2 {\dodocf {#1} {#2} {Generic Function}}
+\def\defmethod #1 #2 {\dodocf {#1} {#2} {Primary Method}}
+\def\defbeforemethod #1 #2 {\dodocf {#1} {#2} {:Before Method}}
+\def\defaftermethod #1 #2 {\dodocf {#1} {#2} {:After Method}}
+\def\defaroundmethod #1 #2 {\dodocf {#1} {#2} {:Around Method}}
+\def\defvar #1 {\dodoc {#1} {Variable}}
+\def\defvarv #1 #2 {\dodocv {#1} {#2} {Variable}}
+\def\defconst #1 {\dodoc {#1} {Constant}}
+\def\defconstv #1 #2 {\dodocv {#1} {#2} {Constant}}
+\def\defclass #1 {\dodoc {#1} {Class}}
+\def\defclassv #1 {\dodocf {#1} {Class}}
+\def\defslot #1 {\dodoc {#1} {Slot}}
+\def\defslotv #1 #2 {\dodocv {#1} {#2} {Slot}}
+\def\defaccessor #1 {\dodoc {#1} {Accessor}}
+\def\definitarg #1 {\dodoc {#1} {Initarg}}
+\def\defoption #1 {\dodoc {#1} {Option}}
+
+%% for creating examples:   (no indexing)
+\def\egdoc#1#2{\Vskip .1pt!%
+	\outdent{$\Rightarrow$}%
+	{\tt #1\hfill\hbox{\brac{\it #2\/}}%
+		\Vskip .1pt!}}
+\def\egdocf#1#2#3{\Vskip .1pt!%
+	\outdent{$\Rightarrow$}%
+	{\hangindent=1cm\hangafter=1%
+		\tt #1\hfill\hbox{\brac{\it #3\/}}\linebreak%
+		{\raggedright{\sl #2}\hfill\Vskip .1pt!}}}
+\def\Egdocf#1#2#3{\Vskip \bigskipamount!%
+	\outdent{$\Rightarrow$}%
+	{\hangindent=1cm\hangafter=1%
+		\tt #1\hfill\hbox{\brac{\it #3\/}}\linebreak%
+		{\raggedright{\sl #2}\hfill\Vskip .1pt!}}}
+\def\egdocv#1#2#3{\Vskip .1pt!%
+	\outdent{$\Rightarrow$}%
+	{\hangindent=1cm\hangafter=1%
+		\tt #1\hfill\hbox{\brac{\it #3\/}}\linebreak%
+		{\raggedright{\tt #2}\hfill\Vskip .1pt!}}}
+
+\def\egvar #1 {\egdoc {#1} {Variable}}
+\def\eggeneric #1 #2 {\egdocf {#1} {#2} {Generic Function}}
+\def\Eggeneric #1 #2 {\Egdocf {#1} {#2} {Generic Function}}
+\def\egmethod #1 #2 {\egdocf {#1} {#2} {Primary Method}}
+\def\egslotv #1 #2 {\egdocv {#1} {#2} {Slot}}
+\def\egaccessor #1 {\egdoc {#1} {Accessor}}
+\def\eginitarg #1 {\egdoc {#1} {Initarg}}
+
+\def\optional{{\tt\&optional}\ }
+\def\rest{{\tt\&rest}\ }
+\def\key{{\tt\&key}\ }
+\def\allow{{\tt\&allow-other-keys}\ }
+\def\body{{\tt\&body}\ }
+
+\def\gap{\bigskip}
+
+%% Common words and phrases
+\def\geco{\mbox{{\sc geco}}}
+\def\Geco{\mbox{{\sc Geco}}}
+\def\ie{{\it i.e.}}
+\def\Ie{{\it I.e.}}
+\def\eg{{\it e.g.}}
+\def\Eg{{\it E.g.}}
+\def\etc.{{\it etc.}}
+
+	\makeindex
+
+% fancyhdr (was fancyheadings) stuff
+\usepackage{fancyhdr}
+\pagestyle{fancy}   %%%% \pagestyle{fancy}	%for fancyheadings.sty.  Must be after any changes to \textwidth
+\renewcommand{\sectionmark}[1]{\markboth{\thesection\ #1}{\thesection\ #1}}
+\renewcommand{\subsectionmark}[1]{\markboth{\thesubsection\ #1}{\thesubsection\ #1}}
+\fancyhead[EOL]{\bf GECO \gecoversion}	%%%% \lhead{\bf GECO \gecoversion}
+\fancyhead[EOR]{\bf\thepage}					%%%% \rhead{\bf\thepage}
+\fancyfoot[EOL]{\today}								%%%% \lfoot{\today}
+\fancyfoot[EOR]{\bf\leftmark}					%%%% \rfoot{\bf\leftmark}
+\fancyfoot[EOC]{}									%%%% \cfoot{}  %defaults to page number
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+

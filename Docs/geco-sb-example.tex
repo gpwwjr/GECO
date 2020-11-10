@@ -1,0 +1,373 @@
+\chapter{A Simple Binary Example} \label{chap:simple-binary-example}
+
+An example of how to customize \geco\ is provided in the file \path|sb-test.lisp|,
+which presents two alternative GAs to solve a simple problem often called the {\em
+count ones}\index{count ones problem} or {\em onemax}\index{onemax problem}
+\cite{ga:ackley87}, which tries to maximize the number of one-bits in a binary
+chromosome. The following material provides an overview of the definitions in this file
+which implement the first example GA, providing some discussion of each, why it is necessary and/or
+what it does, and how it fits into the \geco\ framework.
+
+The code for this example is in the file \path|sb-test.lisp|. It should be noted that
+this example also uses functionality in the file \path|allele-counts.lisp|, which must 
+be loaded before \path|sb-test.lisp| to avoid compilation problems.
+
+\filbreak
+
+\section{Using \Geco\ with Packages} \label{sec:using-geco-packages}
+
+The \path|packages.lisp| file defines the \cl{geco} package, which
+contains all the \geco{} definitions.  Normally, a GA application will
+be defined in its own package or packages.  All the examples provided
+with \geco{} are defined in the \cl{geco-user} package, which is also
+defined in \path|packages.lisp|, as follows:
+\begin{clcode}(defpackage GECO-USER
+    (:use "COMMON-LISP"
+          #+:ccl-2 "CCL"
+          "GECO")
+    (:nicknames "GU"))\end{clcode}
+
+\filbreak
+
+Then, near the beginning of each file containing code in this package, a
+line should appear which tells lisp that the following code is in the
+appropriate package, so that it has access to all the \geco{}
+definitions.  \eg,
+\begin{clcode}(in-package :GECO-USER)\end{clcode}
+
+%\filbreak
+
+{\samepage
+\section{Defining the Genetic Structures}
+
+First, let's define the class of chromosome we'll need. The most common chromosomes
+used by GAs are typically bit vectors, \ie, each locus on the chromosome has a binary
+value. \Geco\ has a predefined subclass of chromosome for just this purpose,
+\inxclass{binary-chromosome}, which though it doesn't have any additional slots, does
+have some specialized methods which support displaying binary chromosomes, and
+decoding values encoded in them. But \inxclass{binary-chromosome} is still too general
+for instantiation, so we define the class \inxclass{binary-chromosome-10} to add a
+method \inxmethod{size} which returns $10$, the number of bits in the chromosome. Now
+when \geco\ instantiates a chromosome of this class, it can determine the size of the
+chromosome's \term{loci vector} by simply using the standard protocol to inquire from
+the chromosome instance its size. This allows \geco\ to allocate the loci vector
+automatically as part of chromosome instantiation.
+\begin{clcode}(defclass BINARY-CHROMOSOME-10 (binary-chromosome)
+  ()
+  (:documentation
+   {\sf "A 10-bit binary chromosome."}))
+
+(defmethod SIZE ((self binary-chromosome-10))
+  {\sf "So \geco\ will know how large to make the chromosome."}
+  10)\end{clcode}
+}%end \samepage
+
+\filbreak
+
+{\samepage
+{\samepage
+Next, we define \inxclass{simple-binary-10-organism} as a subclass of \inxclass{organism}. This
+class will hold a single chromosome of the class we just defined in its
+\inxslot{genotype} slot. And using the same technique as in the previous paragraph, we define
+a method \inxmethod{chromosome-classes} for this class to give \geco\ a list of classes
+for the chromosomes which will be held by instances of this subclass of organism.
+Specifically, this method returns a list of length one (since we only need one
+chromosome), and the sole list element is the name of our application specific
+chromosome class, \inxclass{binary-chromosome-10}.
+\begin{clcode}(defclass SIMPLE-BINARY-10-ORGANISM (organism)
+  ()
+  (:documentation
+   {\sf "An organism with only a 10-bit binary chromosome."}))
+
+(defmethod CHROMOSOME-CLASSES ((self simple-binary-10-organism))
+  {\sf "So \geco\ will know what chromosomes to make."}
+  '(binary-chromosome-10))\end{clcode}
+}%end \samepage
+
+\filbreak
+
+
+The next class definition is a specialization of the \geco\ class
+\inxclass{population-statistics}. Instances of this class are used by \geco\ to record
+statistical information about the current population to simplify certain operations
+like normalizing\index{normalization} scores and determining whether the population
+has converged\index{converged}. By specializing this class, we'll be able to
+piggy-back some of the calculations we want performed on the functions which \geco\
+will already be invoking.
+
+We also make this new class a subclass of the mixin class
+\inxclass{allele-statistics-mixin}, which is defined in a separate file
+\path|allele-counts.lisp|, which must be loaded before \path|sb-test.lisp|
+to avoid compilation problems.
+
+To record the additional information we want, we add a slot
+\inxslot{allele-counts} and name the new specialized class
+\inxclass{binary-population-statistics}. (This allele-count data isn't really useful
+for solving this particular problem. Adding it to the population's statistics was done
+here only to illustrate the use of an \cl{:after} method to extend \geco's builtin
+functionality.)
+\begin{clcode}(defclass BINARY-POPULATION-STATISTICS (population-statistics
+                                        allele-statistics-mixin)
+  ()
+  (:documentation
+   {\sf "The allele-statistics-mixin adds several methods, plus a slot: allele-counts."}))\end{clcode}
+
+\filbreak
+
+The \inxclass{binary-population-statistics} class-specific computation is performed
+by adding an \cl{:after} method to the
+\inxgeneric{compute-statistics} generic function, specialized on our class.
+This method sets the \inxslot{allele-counts} slot to the result returned by invoking another
+\geco\ builtin function, \inxgeneric{compute-binary-allele-statistics}, which returns a list of
+vectors (one per chromosome in the organisms of the population). Each vector contains
+counts of non-zero alleles, one count per locus. Since our organism only has one
+chromosome, we'll get a single vector of counts.
+\begin{clcode}(defmethod COMPUTE-STATISTICS :AFTER
+           ((pop-stats binary-population-statistics))
+  {\sf "Compute the allele statistics for the population and save them."}
+  (setf (allele-counts pop-stats)
+        (compute-binary-allele-statistics (population pop-stats))))\end{clcode}
+
+\filbreak
+
+The next class definition is a specialization of the class
+\inxclass{generational-population}, which is itself a specialization of the class
+\inxclass{population}. We also add the \inxclass{maximizing-score-mixin} so that
+\inxmethod{converged-p} will have the information it needs to determine whether the
+population has \term{converged}.
+
+The principle noteworthy feature of this subclass,
+\inxclass{simple-binary-population}, is that it provides two additional methods. These
+methods provide information to \geco\ so that it can perform its duties
+automatically. Specifically, the \inxmethod{organism-class} method tells \geco\ what
+class the organism instances are to be, and the
+\inxmethod{population-statistics-class} method tells \geco\ what class the population
+statistics instances are to be.
+\begin{clcode}(defclass SIMPLE-BINARY-POPULATION
+          (generational-population maximizing-score-mixin)
+  ()
+  (:documentation
+   {\sf "Our populations are generational, and the scores are maximized."}))
+
+(defmethod ORGANISM-CLASS ((self simple-binary-population))
+  {\sf "So \geco\ knows how to make the organisms in our population."}
+  'simple-binary-10-organism)
+
+(defmethod POPULATION-STATISTICS-CLASS
+           ((self simple-binary-population))
+  {\sf "So \geco\ knows how to make our population statistics instances."}
+  'binary-population-statistics)\end{clcode}
+
+\filbreak
+
+
+At this point please notice that telling \geco\ to create an instance of the class
+\inxclass{simple-binary-population} is sufficient, and that \geco\ can then create a
+complete population of organisms of the proper class, and that each organism will
+contain chromosomes of the proper class, and each chromosome will have a \term{loci
+vector} of the proper size and type, initialized\index{initialization} to random
+alleles. Thus, the structures (at this level) which will be manipulated by our GA are
+completely specified. Next, we need to specify the plan which controls
+the GA.
+
+\filbreak
+
+\section{Defining a Genetic Plan}
+
+Next we introduce a class definition that is a specialization of the class \inxclass{genetic-plan}.
+As mentioned earlier, the \term{genetic plan} provides a strategy which determines how an ecosystem
+regenerates, \ie, how new organisms are created from older organisms. This is the
+heart of the genetic algorithm. Subclasses of the class \inxclass{genetic-plan} are
+primarily used to specialize methods which perform the actual processing of the GA,
+but we define one additional slot, \inxslot{statistics}, which will allow us to record
+statistics about each generation in a list as the population evolves under the plan.
+Alternatively, we could have used a file, or a vector which was large enough to hold
+the maximum number of generations, but simplicity will be the guiding principle for
+our example. Also, since we will have two different \term{genetic plan}s, for the two
+examples illustrated in the file \path|sb-test.lisp|, we define an intermediate abstract
+class \inxclass{simple-plan} to allow us to share some of the functionality between
+the two \term{genetic plan}s.
+\begin{clcode}(defclass SIMPLE-PLAN (genetic-plan)
+  ((STATISTICS
+    :accessor statistics
+    :initarg :statistics
+    :initform nil      ; so we can push instances
+    :documentation {\sf "A stack of population-statistics for all past populations.}"))
+  (:documentation
+   {\sf "Abstract class to allow method sharing for initialization & regeneration."}))\end{clcode}
+
+\filbreak
+
+Next is an \inxmethod{evaluate} method specialized on both the \inxclass{simple-plan}
+and \inxclass{simple-binary-10-organism} classes. This is the method which calculates the
+raw (unnormalized) score of each organism which our plan evolves. In our specific
+problem, score is proportional to the number of set bits in the chromosome, and there
+just happens to be a \geco\ utility which we can use: \inxgeneric{count-allele-codes}.
+Inspecting the code for this method in \path|chromosome-methods.lisp| reveals that it can
+be used to return the number of loci in the chromosome which have allele codes of \cl{1}.
+\begin{clcode}(defmethod EVALUATE ((self simple-binary-10-organism)
+                     (plan simple-plan)
+                     &AUX (chromosome (first (genotype self))))
+  {\sf "The score for our organisms is the number of non-zero alleles."}
+  #+:mcl (declare (ignore plan))
+  (setf (score self)
+        (count-allele-codes chromosome 0 (size chromosome) 1)))\end{clcode}
+
+\filbreak
+
+{\samepage
+A few additional points worth noting about \inxgeneric{evaluate}:
+\begin{itemize}
+  \item This is the only place in our example GA which needs 
+	to interpret the genetic content of our application-specific organism.
+  \item Often it is necessary to \term{decode} the genetic content of an 
+	organism, converting the \term{genotype} into an instance of the
+	\term{phenotype} represented by the genotype.  \Geco\ provides for this by 
+	including the following:
+    \begin{itemize}
+	\item A \inxslot{genotype} slot is defined in the \inxclass{organism} class.
+	\item A \inxslot{phenotype} slot is defined in the
+		\inxclass{organism-phenotype-mixin} class.
+	\item A \inxgeneric{decode} generic function is called in a \cl{:before} method 
+		of \inxgeneric{evaluate} specialized on the
+       	\inxclass{organism-phenotype-mixin} and  
+		\inxclass{genetic-plan} classes.
+	\item Since \geco\ cannot predefine a method for \inxgeneric{decode}, any GAs
+		using phenotypes must be sure to implement one for the application
+		specific subclass of \inxclass{organism} and
+		\inxclass{organism-phenotype-mixin}.
+    \end{itemize}
+  \item Generally there is little reason for the plan to be an argument to
+	this particular method, but it is part of the protocol for the
+	\inxgeneric{evaluate} generic function, which is also used at the 
+	\inxclass{ecosystem} and \inxclass{population} levels of our class hierarchy, and
+        at these higher levels it may well be appropriate for the
+        \term{genetic plan} to discriminate between alternate methods.  
+\end{itemize}
+}%end samepage
+
+\filbreak
+
+The next method defined in our example is \inxmethod{regenerate}, which is specialized
+on both the \inxclass{simple-plan} and the \inxclass{simple-binary-population}
+classes. The purpose of this method is to create a new (or revised) population based
+on the current one, using whatever strategy is specific to the \term{genetic plan}.
+There is a default method provided by \geco\ in
+\path|genetic-plan-methods.lisp| for subclasses of \inxclass{generational-population},
+but it is provided as a template, not a realistic example, since it simply copies
+random organisms from one generation to the next (plus some simple bookkeeping). Our
+specialized version of \inxmethod{regenerate} replaces the random copying with a call
+to a new generic function \inxgeneric{operate-on-population} which takes the current
+and new (but empty) populations as input, and updates the new population. The example
+will define two versions of \inxmethod{operate-on-population}, discriminated by
+subclasses of our \inxclass{simple-plan}. The \inxmethod{regenerate} method also
+records the current population's statistics in the list in the plan's
+\inxslot{statistics} slot. As mentioned earlier, it could have written some of the
+statistical information to a file for later analysis, or possibly used them to support
+the \term{genetic plan}.
+\begin{clcode}(defmethod REGENERATE ((plan simple-plan)
+                       (old-pop simple-binary-population)
+                       &AUX
+                       (new-pop (make-population (ecosystem old-pop)
+                                                 (class-of old-pop)
+                                                 :size (size old-pop))))
+  {\sf "Create a new generation from the previous one, and record statistics."}
+  (setf (ecosystem new-pop) (ecosystem old-pop))
+  ;;{\sf selectively reproduce, crossover, and mutate}
+  (operate-on-population plan old-pop new-pop)
+  ;;{\sf record old-pop's statistics}
+  (push (statistics old-pop)    ;{\sf impractical for real-world problems}
+        (statistics plan))
+  new-pop)\end{clcode}
+
+
+\filbreak
+
+Now we are almost ready to define our alternate versions of
+\inxmethod{operate-on-population} which contain the distinguishing features of our two
+example GAs. To keep them separate, we define two subclasses of our
+\inxclass{simple-plan}: \inxclass{simple-plan-1} and \inxclass{simple-plan-2} (we'll only
+examine \inxclass{simple-plan-1} here). We also give these classes separate specialized methods
+to supply the probabilities with which we should apply the \term{mutate} and
+\term{crossover} operators, since these values may need to be different for the
+two plans.
+\begin{clcode}(defclass SIMPLE-PLAN-1 (simple-plan)
+  ())
+
+(defmethod PROB-MUTATE ((self SIMPLE-PLAN-1))
+  {\sf "This is the probability of mutating an organism, not a single locus as is often used."}
+  0.03)
+
+(defmethod PROB-CROSS ((self SIMPLE-PLAN-1))
+  {\sf "The probability of crossover for an organism."}
+  0.7)\end{clcode}
+
+\filbreak
+
+The method \inxmethod{operate-on-population} for \inxclass{simple-plan-1} uses a
+selection technique referred to by Brindle \cite{ga:brindle,ga:goldberg} as ``stochastic
+remainder selection without replacement''
+(See \inxgeneric{stochastic-remainder-preselect},
+page~\pageref{population:stochastic-remainder-preselect}) to select one organism at a
+time from the old (current) population, then based on a random draw applies either a
+uniform \term{crossover} operator
+\cite{ga:uniform-xover,ga:parameterized-uniform-xover,ga:davis-handbook} with another
+member of the old population (selected randomly), a simple bit mutation\index{mutate}
+operator, or simple reproduction, to supply members of the new population. The
+principle difference found in the \inxmethod{operate-on-population} for
+\inxclass{simple-plan-2} is that the second organism used in \term{crossover} is also
+selected based on fitness, in stead of randomly.
+
+It is worth noting that the use of the stochastic
+remainder selection method is a bit more complicated to use than some other methods.
+It requires using a ``preselect'' method, which actually returns a function (often referred
+to as a \term{generator}), which must
+then be \cl{funcall}ed each time we want to select a new organism.
+
+\filbreak
+\begin{clcode}(defmethod OPERATE-ON-POPULATION
+           ((plan simple-plan-1) old-population new-population &AUX
+            (new-organisms (organisms new-population))
+            (p-cross (prob-cross plan))
+            (p-mutate (+ p-cross (prob-mutate plan)))
+            (orphan (make-instance (organism-class old-population))))
+  {\sf "Apply the genetic operators on selected organisms from the old population."}
+  (let ((selector (stochastic-remainder-preselect old-population)))
+    (do ((org1 (funcall selector) (funcall selector))
+         org2
+         (random# (geco-random 1.0) (geco-random 1.0))
+         (i 0 (1+ i)))
+        ((null org1))
+      (cond
+       ((> p-cross random#)
+        (if (< 1 (hamming-distance
+                  (first (genotype org1))
+                  (first (genotype (setf org2 (pick-random-organism
+                                               old-population))))))
+            (uniform-cross-organisms
+             org1 org2
+             (setf (aref new-organisms i)
+                   (copy-organism
+                    org1 :new-population new-population))
+             orphan) ;;{\sf a throw-away, not in any population so it can be GC'd}
+          ;;{\sf\cdmath hamming distances $<$2 will produce eidetic offspring anyway,}
+          ;;{\sf so bypass crossover \& evaluation}
+          (setf (aref new-organisms i)
+                (copy-organism-with-score
+                 org1 :new-population new-population))))
+       ((> p-mutate random#)
+        (mutate-organism
+         (setf (aref new-organisms i)
+               (copy-organism
+                org1 :new-population new-population))))
+       (T ;;{\sf copying the score bypasses the need for a redundant evaluate}
+        (setf (aref new-organisms i)
+              (copy-organism-with-score
+               org1 :new-population new-population)))))))\end{clcode}
+\filbreak
+
+The remaining code in \verb|sb-test.lisp| simply provides a test harness 
+to repeatedly invoke the GAs, and accumulate performance information over 
+a specified number of runs.
+
+\filbreak
