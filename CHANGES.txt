@@ -32,7 +32,7 @@ GECO Version History:
 2.0.1 9-19-94   GPW
  - Fixed a bug in the EIDETIC method for organisms which surfaces when
    comparing organisms with no chromosomes.
-2.1 ??-???-??   GPW
+2.1 11-12-20   GPW
  - Converted documentation to PDF. It's also been updated and improved.
    There are two versions: normal printable, and hyperlinked.
  - Moved the change history (the data in this file) from the README file.
