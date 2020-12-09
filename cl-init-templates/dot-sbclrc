@@ -1,0 +1,58 @@
+;;;; -*- Mode: LISP; Syntax: Common-Lisp; Package: CL-USER; Base: 10. -*-
+;;; .sbclrc.lisp
+;;; initialization file for Steel Bank Common Lisp (SBCL)
+;;; George Williams
+
+(format t "home:.sbclrc loading ... ")
+
+;;; Logical Hosts
+(format t "defining logical hosts ... ")
+;; SBCL sets up logical pathname translations for two logical hosts: ccl and home
+;;  ccl  is set to the value of the environment variable
+;;       CCL_DEFAULT_DIRECTORY, if that variable exists. Otherwise, it is set
+;;       to the directory containing the heap image file.
+;;  home refers to the user's home directory.
+(setf (logical-pathname-translations "GECO")
+      '(("**;*.*.*" "~/lisp/geco/")))
+
+;; to find the physical pathname eqiuvalent, use something like:
+;;    (cl:translate-logical-pathname "GECO:x.lisp") 
+
+
+;;; ASDF (pre-built into SBCL)
+(format t "setting up ASDF ... ")
+(require :asdf)
+(setf asdf:*central-registry* nil) ;; so this file can be reloaded
+(setf asdf:*central-registry*      ;; NIL by default
+      ;; Default directories, usually just the ``current directory''
+      '(*default-pathname-defaults*  ;; the current directory by default
+
+	;; Additional places where ASDF can find
+	;; system definition files
+	;; #p"/home/foo/lisp/systems/"
+	;; #p"/usr/share/common-lisp/systems/"
+	))
+
+
+;; Quicklisp
+;;(format t "setting up Quicklisp ... ")
+;;(load "QUICKLISP:setup.lisp")
+
+
+;;; GECO development related
+(format t "setting up GECO ... ")
+;; ASDF
+(push #P"/home/parallels/lisp/geco/" asdf:*central-registry*)
+;; geco-setup- convenience function to put ccl in geco-dev/ and load geco
+(require :sb-posix)
+(progn
+  (in-package :cl-user)
+  (defun geco-setup ()
+    (sb-posix::chdir "/home/parallels/lisp/geco")
+    (asdf:load-system :geco)
+    (format t "~% current working directory: ~S" (sb-posix:getcwd))
+    (in-package :GECO-USER)
+    (format t "~%in package GECO-USER"))
+  (format t "~%... (geco-setup) is defined"))
+
+(format t "~%... home:ccl-init loaded~%")
