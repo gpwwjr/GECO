@@ -1,8 +1,6 @@
 # GECO
-You can download prebuilt tarballs of the source and documentation PDFs from here:
-  http://hiwaay.net/~gpw/geco/geco.html
 
-Genetic Evolution through Combination of Objects (GECO), version 2.1
+Genetic Evolution through Combination of Objects (GECO), version 2.1.1
 
 GECO is an extensible, object-oriented framework for prototyping genetic
 algorithms in Common Lisp. GECO makes extensive use of CLOS, the Common
@@ -11,20 +9,22 @@ provided by the classes have been chosen with the intent both of being
 easily understandable to anyone familiar with the paradigm of genetic
 algorithms, and of providing the algorithm developer with the ability to
 customize all aspects of its operation. It comes with extensive
-documentation, in the form of a PostScript(tm) file, and some simple
-examples are also provided to illustrate its intended use.
+documentation, in the form of a two PDF files (see below), and some
+simple examples are also provided to illustrate its intended use.
 
-The files available include the following:
-    GECO-README.txt      Basic information about the software (this file)
-    GECO-pdf.tgz         Unix-compressed documentation
+The official release is available from https://github.com/gpwwjr/GECO
+Among the files included in the official release are:
+    README.md          Basic information about the software (this file)
+    CHANGES.txt        Which gives a summary of the version history,
+                       including information about changes in each release
+    COPYING.LIB-2.0    A copy of the GNU LIBRARY GENERAL PUBLIC LICENSE,
+                       Version 2, June 1991
+    All the source code, including the TeX source for the documentation
+    GECO-pdf.tgz       Unix-compressed documentation
       This archive includes:
        - geco.pdf, a normal printable PDF file
        - geco-hyperlinked.pdf, a hyperlinked version of geco.pdf,
          which is handy for online reading, but not as nice for printing
-    GECO-v2.1.tgz        Unix-compressed source code
-     This archive also includes:
-       - CHANGES.txt
-       - COPYING.LIB-2.0
 
 Copyright (C) 1992,1993,2020  George P. W. Williams, Jr.
 
@@ -45,24 +45,26 @@ Copyright (C) 1992,1993,2020  George P. W. Williams, Jr.
 Author:
     George P. W. Williams, Jr.
     1334 Columbus City Rd.
-    Scottsboro, AL 35769
+    Scottsboro, AL 35769-9014
     george.p.williams@pobox.com
 
-This is an updated version as of 2020 (the original version has been long-neglected;
-it hasn't been updated since 1993). The current version has been updated to use the
-ASDF system definition/build system, and the files have all been converted to use
-unix line endings (line-feeds; previous versions used old the old MacOS convention
-of carriage-returns). I'm also now providing the documentation in PDF format
-(instead of PostScript in the earlier versions).
+This is an updated version as of 2020 (the original version has been
+long-neglected; it hasn't been updated since 1993). The current version
+has been updated to use the ASDF system definition/build system, and the
+files have all been converted to use unix line endings (line-feeds;
+previous versions used old the old MacOS convention of
+carriage-returns). I'm also now providing the documentation in PDF
+format (instead of PostScript in the earlier versions).
 
-Bug reports, improvements, and feature requests should be sent to the author at the
-contact information above. I will try to respond to them.
+Bug reports, improvements, and feature requests should be sent to the
+author at the contact information above. I will try to respond to them.
 Ports to other lisps are also welcome.
 
-I have gone to a lot of effort to make GECO portable among CLtL2 compliant Common Lisps.
-I tested the previous versions on several different lisp implemenations (MCL 2.0, ACL 4.1,
-and LCL 4.1), but I currently only have Clozure CL (macOS 10.15.7), so that's all I can
-vouch for at this time.
+I have gone to a lot of effort to make GECO portable among CLtL2
+compliant Common Lisps. I tested the previous versions on several
+different lisp implemenations (MCL 2.0, ACL 4.1, and LCL 4.1). This
+version has been tested using Clozure CL 1.12 (macOS 10.15.7), and Steel
+Bank Common Lisp 2.0.11 (Ubuntu 20.04 Linux).
 
 TO USE THIS SOFTWARE
  - There is detailed documentation (~100 pages!) in geco.pdf
@@ -72,7 +74,7 @@ TO USE THIS SOFTWARE
    to load GECO. You should have a working installation of ASDF.
    (see https://common-lisp.net/project/asdf/)
    You will probably need to do something like this:
-   (push #P"/Users/george/lisp/GECO-dev/" asdf:*central-registry*)
+   (push #P"/Users/george/lisp/geco/" asdf:*central-registry*)
    and (asdf:load-system :geco)
  - There are some conditional compilation options. See packages.lisp for
    more information.

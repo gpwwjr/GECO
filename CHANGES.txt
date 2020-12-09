@@ -1,6 +1,6 @@
 GECO Version History:
-1.0 16-Nov-92	GPW	Initial public release.
-2.0 29-Nov-93   GPW
+1.0 16-Nov-92  GPW  Initial public release.
+2.0 29-Nov-93  GPW
  - Changed the license to the GNU Library General Public License
  - Minor patches for compatibility with other Lisps
  - Added documentation
@@ -29,7 +29,7 @@ GECO Version History:
    population-statistics class
  - Miscellaneous efficiency improvements
  - Even fixed a bug or two B^)
-2.0.1 9-19-94   GPW
+2.0.1 9-19-94  GPW
  - Fixed a bug in the EIDETIC method for organisms which surfaces when
    comparing organisms with no chromosomes.
 2.1 11-12-20   GPW
@@ -55,7 +55,17 @@ GECO Version History:
    ss-test.lisp
  - For the :geco-standard-cl-random feature, coerce the argument to
    geco-random-float to a floating point number
+2.1.1 12-9-20  GPW
+ - Fixed a small bug in methods/organism-methods.lisp related to floating
+   point conversion that was discovered when testing under SBCL.
+ - Added some templates to illustrate how to initialize lisp development
+   environments to incorporate GECO.
+ - Updated the documentation to reflect the current GECO version, the lisp
+   initialization templates, and a bit more information about the
+   sb-test.lisp and ss-test.lisp files.
+ - Deleted the old GECO-README.txt file, which has been superseded by the
+   README.md file, which has also been updated.
 
 Contributors:
-GPW	George Williams
+GPW  George Williams
 

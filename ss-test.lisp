@@ -317,7 +317,7 @@ Copyright (C) 1992,1993,2020  George P. W. Williams, Jr.
 (progn (run-new-sse 'sse-plan)
        (time (evolve *sse*))
        (inspect *sse*))
-(test-sse 10 'sse-plan)
+(test-sse 10 'sse-plan)   ;; this will run the sse-plan 10 times; a good test
 (evolve *sse*)
 (inspect *sse*)
 (progn (test-sse 1 'sse-plan)

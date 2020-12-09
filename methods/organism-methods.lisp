@@ -104,7 +104,7 @@ automatically via a :before method, and similarly increment the evaluation-numbe
   (let ((delta (- (max-score stats) (min-score stats)))
         (range (- (score self) (min-score stats))))
     (setf (normalized-score self)
-          (the short-float (/ range delta)))))
+          (the short-float (float (/ range delta))))))
 
 (defmethod EIDETIC ((org1 organism) (org2 organism) &AUX
                     (genes-1 (genotype org1))

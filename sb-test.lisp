@@ -259,12 +259,13 @@ Genetic Algorithms"  (in Davis' 1987 collection Genetic Algorithms and Simulated
 
 #||   some code snippets that can be copied & pasted into the listener
 (in-package :geco-user)
+(load "allele-counts.lisp")    ;; don't forget to load this to run this code
 (progn (test-plan 1 'simple-plan-1)
        (inspect *sbe*))
 (progn (test-plan 1 'simple-plan-2)
        (inspect *sbe*))
-(test-plan 10 'simple-plan-1)
-(test-plan 10 'simple-plan-2)
+(test-plan 10 'simple-plan-1)   ;; this will run simple-plan-1 10 times; a good test
+(test-plan 10 'simple-plan-2)   ;; this will run simple-plan-2 10 times; a good test
 
 (evaluate (population *sbe*) (plan *sbe*))
 (inspect *sbe*)

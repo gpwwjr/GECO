@@ -201,9 +201,10 @@ the other \inxclass{population} methods.
 
 \end{itemize}
 
-Finally, there are also some files containing example GAs and related code.
+There are also some files containing example GAs and related code.
 These files aren't intended to show impressive solutions to tough problems;
 rather they are intended to show how one might go about building a GA using \geco.
+They can also be useful for testing \geco\ in new lisp environments.
 
 \begin{itemize}
 	\item \path|sb-test.lisp|\\
@@ -219,6 +220,20 @@ rather they are intended to show how one might go about building a GA using \gec
   \item \path|ss-test.lisp|\\
   This is the simple sequence example discussed in
   Chapter~\ref{chap:simple-sequence-example}
+\end{itemize}
+
+Finally, there are also some files containing some templates for initialization files
+for Common Lisp implementations that are intended to illustrate how to configure a lisp
+environment to use \geco.
+
+\begin{itemize}
+	\item \path|cl-init-templates/dot-ccl-init.lisp|\\
+	This is a template for code that might be included in a \path|.ccl-init.lisp| for use
+	with Clozure Common Lisp (CCL).
+	
+	\item \path|cl-init-templates/dot-sbclrc|\\
+	This is a template for code that might be included in a \path|.sblclrc| for use
+	with Steel Bank Common Lisp (SBCL).
 \end{itemize}
 
 
