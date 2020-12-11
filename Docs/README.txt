@@ -10,3 +10,7 @@ command-line tools or a gui-based approach.
 
 The top-level file is geco.tex. It will also be necessary to run BibTex to
 produce the bibliography, and makeindex to produce the index.
+
+Note that building the hyperlinked version of the documentation requires
+making some very simple edits to the geco.tex file. See the comments near
+the beginning of the file.
