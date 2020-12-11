@@ -67,7 +67,9 @@ GECO Version History:
    README.md file, which has also been updated.
 2.1.1a 12-11-20  GPW
  - I neglected to add some of my local LaTeX style files to the Docs
-   directory. These are now included.
+   directory. These are now included. I've also added a README.txt file
+   to the Docs subdirectory to provide a little information for anyone
+   who wants to be able to build the documentation from the sources.
 
 Contributors:
 GPW  George Williams
