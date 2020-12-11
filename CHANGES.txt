@@ -65,7 +65,7 @@ GECO Version History:
    sb-test.lisp and ss-test.lisp files.
  - Deleted the old GECO-README.txt file, which has been superseded by the
    README.md file, which has also been updated.
-2.1.1.a 12-11-20  GPW
+2.1.1a 12-11-20  GPW
  - I neglected to add some of my local LaTeX style files to the Docs
    directory. These are now included.
 
