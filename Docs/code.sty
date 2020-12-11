@@ -1,0 +1,66 @@
+%%%%
+%% code.sty : LaTex environment for verbatim program code displays
+%%
+%% George Ferguson, ferguson@cs.rochester.edu, 3 Jul 1991.
+%%
+%% Requires Rainer Sch\"opf's (SCHOEPF@SC.ZIB-Berlin.DE) verbatim
+%% style option. Based on a suggestion by Bernd Raichle
+%% (raichle@azu.informatik.uni-stuttgart.de).
+%%
+%% Uses LaTeX iteration macro @tfor to process arguments to code
+%% environment.
+%%
+\typeout{Style-option: `code' (George Ferguson)}
+%\input{/u/ferguson/lib/tex/verbatim.sty}
+\input{verbatim.sty}
+
+%%
+%% Miscellaneous stuff so we could easily `let' things.
+%%
+\def\gf@flushleft#1{\noindent#1\hfill}
+\def\gf@flushright#1{\hfill\relax#1}
+\def\gf@indented#1{\par\hskip\parskip#1\hfill}
+\def\gf@noop#1{#1}
+
+%%
+%% The code environment formats the text between \begin{code}{opts}
+%% \end{code} in verbatim mode. The box containing the code is only as
+%% wide as its longest line. The `opts' are interpreted as follows:
+%%    c : center the block of code
+%%    l : make the block of code flush to the left margin
+%%    r : make the block of code flush to the right margin
+%%    i : indent the block of code (by \parskip) from the left
+%%    f : draw a frame around the block of code
+%%    t : make the resulting box have its baseline at the top
+%%    b : make the resulting box have its baseline at the bottom
+%% Any combination and order of options is acceptable, but only the last
+%% of {c,l,r,i} and {t,b} will have horizontal and vertical effect,
+%% respectively.
+%% The default is to produce a flush-left, bottom-aligned block of code.
+%%   
+\newenvironment{code}[1]{%
+  % redefine `processline' to produce only a line as wide
+  % as the natural width of the line
+  \def\verbatim@processline{%
+    {\setbox0=\hbox{\the\verbatim@line}%
+    \hsize=\wd0 \the\verbatim@line\par}}%
+  % set finishing ``mode''
+  \global\let\gf@hadjust\hbox
+  \global\let\gf@vadjust\vbox
+  \global\let\gf@frame\gf@noop
+  \@tfor \gf@char :=#1\do
+    {\if\gf@char c\global\let\gf@hadjust\centerline\fi
+     \if\gf@char l\global\let\gf@hadjust\gf@flushleft\fi
+     \if\gf@char r\global\let\gf@hadjust\gf@flushright\fi
+     \if\gf@char i\global\let\gf@hadjust\gf@indented\fi
+     \if\gf@char t\global\let\gf@vadjust\vtop\fi
+     \if\gf@char b\global\let\gf@vadjust\vbox\fi
+     \if\gf@char f\global\let\gf@frame\frame\fi
+    }
+  % save the verbatim code in a box
+  \setbox0=\gf@vadjust\bgroup \verbatim
+}{%
+  \endverbatim
+  \egroup % close the box and `box' it appropriately
+  \gf@hadjust{\gf@frame{\box0}}
+}
