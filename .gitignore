@@ -11,4 +11,14 @@
 *.log
 *.xml
 *.toc
+ non-git-controlled
 /Docs/geco-blx.bib
+/Docs/ar
+/Docs/figs/*.pxd
+/Docs/figs/*.cvd
+Docs/figs/- figure file creation.rtf
+Docs/figs/ar/
+Docs/- texstudio.app
+Docs/Working-notes
+.DS_Store
+
