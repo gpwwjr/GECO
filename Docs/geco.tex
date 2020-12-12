@@ -13,13 +13,21 @@
 \addbibresource{geco}
 
 
-%\usepackage{hyperref}	% add hyperlinks in PdfLatex for things where it would be convenient
-	% if not using hyperref, uncomment the following line to define a substitute for \href:
+\newtoggle{hyperlinks}
+% use one of the two following lines
+\toggletrue{hyperlinks}	% add hyperlinks in the pdf
+%\togglefalse{hyperlinks}	% do NOT add hyperlinks
+
+% !!! whenever changing between using/not using hyperref, rebuild the index
+% !!! assure that the \usepackage{path} line precedes all this
+
+\iftoggle{hyperlinks}{%
+	% add hyperlinks in PdfLatex for things where it would be convenient
+	\usepackage{hyperref}
+}{
+	% if not using hyperref, define a substitute for \href:
 	\def\href#1#2{\path|#1|}
-	% if using hyperref, comment out the line above
-	%
-	% !!! whenever changing between using/not using hyperref, rebuild the index
-	% !!! assure that the \usepackage{path} line precedes all this
+}
 
 
 \def\gecoversion{$2.1.1$}
