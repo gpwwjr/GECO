@@ -11,5 +11,6 @@ geco.pdf: $(wildcard *.sty) $(wildcard *.tex)
 	pdflatex geco.tex
 
 clean:
-	-rm *.pdf *.aux *.log *.toc *.bbl *.blg *.idx *.ilg *.ind *.lof *.xml
+	-rm *.pdf *.aux *.log *.toc *.bbl *.blg *.idx *.ilg *.ind *.lof *.xml geco-blx.bib *.txss *.out \
+		*.synctex.gz
 
