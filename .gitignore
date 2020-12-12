@@ -1,0 +1,14 @@
+*~
+#*
+*.ilg
+*.ind
+*.lof
+*.aux
+*.bbl
+*.pdf
+*.blg
+*.idx
+*.log
+*.xml
+*.toc
+/Docs/geco-blx.bib
