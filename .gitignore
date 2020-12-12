@@ -12,10 +12,12 @@
 *.xml
 *.toc
  non-git-controlled
-/Docs/geco-blx.bib
-/Docs/ar
-/Docs/figs/*.pxd
-/Docs/figs/*.cvd
+Docs/geco-blx.bib
+Docs/ar
+Docs/figs/*.pxd
+Docs/figs/*.cvd
+Docs/geco.out
+Docs/geco.synctex.gz
 Docs/figs/- figure file creation.rtf
 Docs/figs/ar/
 Docs/- texstudio.app
