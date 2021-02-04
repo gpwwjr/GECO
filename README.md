@@ -26,7 +26,7 @@ Among the files included in the official release are:
        - geco-hyperlinked.pdf, a hyperlinked version of geco.pdf,
          which is handy for online reading, but not as nice for printing
 
-Copyright (C) 1992,1993,2020  George P. W. Williams, Jr.
+Copyright (C) 1992,1993,2020,2021  George P. W. Williams, Jr.
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -80,3 +80,5 @@ TO USE THIS SOFTWARE
    more information.
  - Some examples are provided to illustrate GECO's intended use.
    See the documentation for details.
+ - GECO is now available as part of the QuickLisp distribution system,
+   (see https://www.quicklisp.org).

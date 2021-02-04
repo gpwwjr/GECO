@@ -222,6 +222,48 @@ They can also be useful for testing \geco\ in new lisp environments.
   Chapter~\ref{chap:simple-sequence-example}
 \end{itemize}
 
+The \TeX\ source code for creating the documentation (this file) are containd in the \path|Docs|
+directory.
+\begin{itemize}
+	\item \path|Docs/Makefile|\\
+	This is the file that controls running all the necessary \TeX\ processors to create the
+	\path|geco.pdf| \geco\ documentation file.
+	
+	\item \path|Docs/geco.tex|\\
+	This is the root document file, which is specified on the command line to create the documentation.
+	This file contains a toggle near it's beginning that controls whether \TeX\ produces a version of
+	\path|geco.pdf| that contains clickable hyperlinks. See the comments near the beginning of this file
+	for how to change this toggle. It contains the title page and abstract, and references other
+	files in the order appropriate to structure the document, including the table of contents, list of
+	figures, each of the chapters, the bibliography, and the index.
+	
+	\item \path|Docs/geco.bib|\\
+	This is the source code for creating the bibliograph entries, referred to in the \path|*.tex| files.
+	
+	\item \path|Docs/geco-defs.tex|\\
+	This file contains definitions for \TeX\ macros and other items that support the specialized formatting
+	used within the documentation.
+	
+	\item \path|Docs/geco-intro.tex|\\
+	This file contains the chapter, the introduction to \geco.
+	
+	\item \path|Docs/geco-concepts.tex|\\
+	This file contains the chapter, the overview of \geco\ concepts.
+	
+	\item \path|Docs/geco-details.tex|\\
+	This files contains the chapter, the details of all the \geco\ classes, methods, functions, \etc.
+	
+	\item \path|Docs/geco-sb-exampe.tex|\\
+	This file contains the chapter discussing the simple binary example.
+	
+	\item \path|Docs/geco-ss-exampe.tex|\\
+	This file contains the chapter discussing the simple sequence example.
+	
+	\item \path|Docs/geco-files.tex|\\
+	This file contains the chapter discussing the contents and locations of the \geco\ files..
+\end{itemize}
+\filbreak
+
 Finally, there are also some files containing some templates for initialization files
 for Common Lisp implementations that are intended to illustrate how to configure a lisp
 environment to use \geco.

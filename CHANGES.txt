@@ -1,5 +1,57 @@
 GECO Version History:
-1.0 16-Nov-92  GPW  Initial public release.
+2.1.2 2-4-21  GPW
+ - Reordered this file into reverse chronological order.
+ - Updated the GECO documentation to describe the files in the Docs
+   directory, which contains the source code for creating the GECO
+   documentation.
+2.1.1b 12-12-20  GPW, MA
+ - Added .gitignore and Docs/Makefile (MA). Added more details to these
+   two files (GPW).
+ - Improved the way Docs/geco.tex must be edited to produce a hyperlinked
+   version of the GECO documentation.
+ - Removed Docs/verbatim.sty, as it's no longer used.
+2.1.1a 12-11-20  GPW
+ - I neglected to add some of my local LaTeX style files to the Docs
+   directory. These are now included.
+ - I've also added a README.txt file to the Docs subdirectory to provide a
+   little information for anyone who wants to be able to build the
+   documentation from the sources.
+2.1.1 12-9-20  GPW
+ - Fixed a small bug in methods/organism-methods.lisp related to floating
+   point conversion that was discovered when testing under SBCL.
+ - Added some templates to illustrate how to initialize lisp development
+   environments to incorporate GECO.
+ - Updated the documentation to reflect the current GECO version, the lisp
+   initialization templates, and a bit more information about the
+   sb-test.lisp and ss-test.lisp files.
+ - Deleted the old GECO-README.txt file, which has been superseded by the
+   README.md file, which has also been updated.
+2.1 11-12-20   GPW
+ - Converted documentation to PDF. It's also been updated and improved.
+   There are two versions: normal printable, and hyperlinked.
+ - Moved the change history (the data in this file) from the README file.
+ - Converted text files to unix line-endings (LFs, instead of CRs)
+ - Changed the calling sequence for the normalize-score generic function
+   and methods (removed the stats argument, since it's not needed)
+ - Fixed errors in bibliography of documentation
+ - Fixed error in pmx-cross-organisms to fix a bad arglist for
+   pmx-cross-chromosomes
+ - Fixed an error in the shared-initialize :after method for the
+   gray-code-translation class
+ - Rewrote pick-random-chromosome-index to more accurately do its job as
+   documented
+ - Renamed pick-locus-index to pick-random-locus-index, for consistency
+ - Modified the 
+ - Converted from MK-Defsystem to ASDF. This entailed moving a number of
+   files to subdirectories to correspond to the modules in geco.asd
+ - Updated copyright dates
+ - New versions of the demo files: sb-test.lisp, allele-counts.lisp, and
+   ss-test.lisp
+ - For the :geco-standard-cl-random feature, coerce the argument to
+   geco-random-float to a floating point number
+2.0.1 9-19-94  GPW
+ - Fixed a bug in the EIDETIC method for organisms which surfaces when
+   comparing organisms with no chromosomes.
 2.0 29-Nov-93  GPW
  - Changed the license to the GNU Library General Public License
  - Minor patches for compatibility with other Lisps
@@ -29,49 +81,10 @@ GECO Version History:
    population-statistics class
  - Miscellaneous efficiency improvements
  - Even fixed a bug or two B^)
-2.0.1 9-19-94  GPW
- - Fixed a bug in the EIDETIC method for organisms which surfaces when
-   comparing organisms with no chromosomes.
-2.1 11-12-20   GPW
- - Converted documentation to PDF. It's also been updated and improved.
-   There are two versions: normal printable, and hyperlinked.
- - Moved the change history (the data in this file) from the README file.
- - Converted text files to unix line-endings (LFs, instead of CRs)
- - Changed the calling sequence for the normalize-score generic function
-   and methods (removed the stats argument, since it's not needed)
- - Fixed errors in bibliography of documentation
- - Fixed error in pmx-cross-organisms to fix a bad arglist for
-   pmx-cross-chromosomes
- - Fixed an error in the shared-initialize :after method for the
-   gray-code-translation class
- - Rewrote pick-random-chromosome-index to more accurately do its job as
-   documented
- - Renamed pick-locus-index to pick-random-locus-index, for consistency
- - Modified the 
- - Converted from MK-Defsystem to ASDF. This entailed moving a number of
-   files to subdirectories to correspond to the modules in geco.asd
- - Updated copyright dates
- - New versions of the demo files: sb-test.lisp, allele-counts.lisp, and
-   ss-test.lisp
- - For the :geco-standard-cl-random feature, coerce the argument to
-   geco-random-float to a floating point number
-2.1.1 12-9-20  GPW
- - Fixed a small bug in methods/organism-methods.lisp related to floating
-   point conversion that was discovered when testing under SBCL.
- - Added some templates to illustrate how to initialize lisp development
-   environments to incorporate GECO.
- - Updated the documentation to reflect the current GECO version, the lisp
-   initialization templates, and a bit more information about the
-   sb-test.lisp and ss-test.lisp files.
- - Deleted the old GECO-README.txt file, which has been superseded by the
-   README.md file, which has also been updated.
-2.1.1a 12-11-20  GPW
- - I neglected to add some of my local LaTeX style files to the Docs
-   directory. These are now included.
- - I've also added a README.txt file to the Docs subdirectory to provide a
-   little information for anyone who wants to be able to build the
-   documentation from the sources.
+1.0 16-Nov-92  GPW  Initial public release.
 
 Contributors:
 GPW  George Williams
+MA   Masataro Asai
+
 
