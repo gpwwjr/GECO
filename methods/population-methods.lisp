@@ -212,9 +212,14 @@ the population."
 (defmethod CONVERGENCE-THRESHOLD-MARGIN ((pop minimizing-score-mixin))
   0.05)
 
-(defmethod BEST-ORGANISM ((pop minimizing-score-mixin))
+(defmethod BEST-ORGANISM-ACCESSOR ((pop minimizing-score-mixin))
   #'min-organism)
 
-(defmethod WORST-ORGANISM ((pop minimizing-score-mixin))
+(defmethod WORST-ORGANISM-ACCESSOR ((pop minimizing-score-mixin))
   #'max-organism)
 
+(defmethod BEST-ORGANISM ((pop minimizing-score-mixin))
+  (min-organism (statistics pop)))
+
+(defmethod WORST-ORGANISM ((pop minimizing-score-mixin))
+  (max-organism (statistics pop)))
